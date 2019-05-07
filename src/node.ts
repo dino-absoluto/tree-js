@@ -194,6 +194,7 @@ export class Node implements ChildNode, ParentNode {
       last.after(...items)
     } else {
       Node.takeOver(this, items)
+      Node.link(items)
       this[FIRST] = items[0]
       this[LAST] = items[items.length - 1]
     }
@@ -205,6 +206,7 @@ export class Node implements ChildNode, ParentNode {
       first.before(...items)
     } else {
       Node.takeOver(this, items)
+      Node.link(items)
       this[FIRST] = items[0]
       this[LAST] = items[items.length - 1]
     }
