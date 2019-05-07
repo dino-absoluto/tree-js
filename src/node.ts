@@ -136,9 +136,13 @@ export class Node implements ChildNode, ParentNode {
     }
     if (!items.length) {
       this.remove()
+      return
     }
     Node.takeOver(parent, items)
     const { [PREVIOUS]: previous, [NEXT]: next } = this
+    this[PREVIOUS] = undefined
+    this[NEXT] = undefined
+    this[PARENT] = undefined
     if (next) {
       items.push(next)
     } else {
