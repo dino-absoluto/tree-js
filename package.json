@@ -35,6 +35,7 @@
     "@types/node": "^12.0.0",
     "@typescript-eslint/eslint-plugin": "^1.7.0",
     "@typescript-eslint/parser": "^1.7.0",
+    "coveralls": "^3.0.3",
     "del": "^4.1.1",
     "eslint": "^5.16.0",
     "eslint-config-standard": "^12.0.0",
