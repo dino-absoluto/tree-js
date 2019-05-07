@@ -18,5 +18,6 @@
  */
 /* imports */
 /* reexports */
+export { ChildNode, ParentNode } from './common'
 export { Node, NodeList } from './node'
 /* code */

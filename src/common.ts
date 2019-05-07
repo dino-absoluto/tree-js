@@ -19,6 +19,7 @@
 /* imports */
 /* code */
 
+/** @public */
 export interface ChildNode {
   remove (): void
   before (...items: ChildNode[]): void
@@ -26,6 +27,7 @@ export interface ChildNode {
   replaceWith (...items: ChildNode[]): void
 }
 
+/** @public */
 export interface ParentNode {
   append (...items: ChildNode[]): void
   prepend (...items: ChildNode[]): void

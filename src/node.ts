@@ -20,13 +20,20 @@
 import { ChildNode, ParentNode } from './common'
 /* code */
 
+/** @internal */
 const NEXT = Symbol('next')
+/** @internal */
 const PREVIOUS = Symbol('previous')
+/** @internal */
 const PARENT = Symbol('parent')
+/** @internal */
 const FIRST = Symbol('first')
+/** @internal */
 const LAST = Symbol('last')
+/** @internal */
 const LIST = Symbol('node-list')
 
+/** @public */
 export class NodeList<T extends Node> {
   private parent: T
   public constructor (parent: T) {
@@ -49,6 +56,7 @@ export class NodeList<T extends Node> {
   }
 }
 
+/** @public */
 export class Node implements ChildNode, ParentNode {
   private [NEXT]?: Node
   private [PREVIOUS]?: Node
