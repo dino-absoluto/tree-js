@@ -20,12 +20,12 @@
 import { ChildNode, ParentNode } from './common'
 /* code */
 
-const NEXT = Symbol('next node')
-const PREVIOUS = Symbol('previous node')
-const PARENT = Symbol('parent node')
-const FIRST = Symbol('first child node')
-const LAST = Symbol('last child node')
-const LIST = Symbol('node list')
+const NEXT = Symbol('next')
+const PREVIOUS = Symbol('previous')
+const PARENT = Symbol('parent')
+const FIRST = Symbol('first')
+const LAST = Symbol('last')
+const LIST = Symbol('node-list')
 
 export class NodeList {
   private parent: Node
