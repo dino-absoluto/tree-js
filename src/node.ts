@@ -61,14 +61,14 @@ export class Node implements ChildNode, ParentNode {
     }
   }
 
-  public static takeOver = (parent: Node, items: Node[]): void => {
+  private static takeOver = (parent: Node, items: Node[]): void => {
     for (const item of items) {
       item.remove()
       item[PARENT] = parent
     }
   }
 
-  public static link = (items: Node[]): void => {
+  private static link = (items: Node[]): void => {
     if (items.length > 1) {
       const end = items.length - 1
       for (let i = 1; i < end; i++) {
