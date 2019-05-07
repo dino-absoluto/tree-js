@@ -61,6 +61,10 @@ export class Node implements ChildNode, ParentNode {
     return this[PARENT]
   }
 
+  protected setParent (parent: Node): void {
+    this[PARENT] = parent
+  }
+
   public get children (): NodeList<Node> {
     const { [LIST]: list } = this
     if (list) {
@@ -83,7 +87,7 @@ export class Node implements ChildNode, ParentNode {
   private static takeOver = (parent: Node, items: Node[]): void => {
     for (const item of items) {
       item.remove()
-      item[PARENT] = parent
+      item.setParent(parent)
     }
   }
 
