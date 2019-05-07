@@ -27,17 +27,24 @@ const FIRST = Symbol('first')
 const LAST = Symbol('last')
 const LIST = Symbol('node-list')
 
-export class NodeList {
-  private parent: Node
-  public constructor (parent: Node) {
+export class NodeList<T extends Node> {
+  private parent: T
+  public constructor (parent: T) {
     this.parent = parent
   }
 
-  public * [Symbol.iterator] (): IterableIterator<Node> {
+  public * [Symbol.iterator] (): IterableIterator<T> {
     let node = this.parent[FIRST]
     while (node) {
-      yield node
+      yield node as T
       node = node[NEXT]
+    }
+  }
+
+  public * entries (): IterableIterator<[number, T]> {
+    let i = 0
+    for (const node of this) {
+      yield [i++, node]
     }
   }
 }
@@ -48,9 +55,13 @@ export class Node implements ChildNode, ParentNode {
   private [PARENT]?: Node
   private [FIRST]?: Node
   private [LAST]?: Node
-  private [LIST]?: NodeList
+  private [LIST]?: NodeList<Node>
 
-  public get children (): NodeList {
+  public get parent (): Node | undefined {
+    return this[PARENT]
+  }
+
+  public get children (): NodeList<Node> {
     const { [LIST]: list } = this
     if (list) {
       return list
