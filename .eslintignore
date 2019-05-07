@@ -1,0 +1,5 @@
+/dist
+/node_modules
+/coverage
+__tmp__
+__snapshots__
