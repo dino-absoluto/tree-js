@@ -25,6 +25,7 @@ const PREVIOUS = Symbol('previous node')
 const PARENT = Symbol('parent node')
 const FIRST = Symbol('first child node')
 const LAST = Symbol('last child node')
+const LIST = Symbol('node list')
 
 export class NodeList {
   private parent: Node
@@ -47,8 +48,18 @@ export class Node implements ChildNode, ParentNode {
   private [PARENT]?: Node
   private [FIRST]?: Node
   private [LAST]?: Node
+  private [LIST]?: NodeList
 
-  public children = new NodeList(this)
+  public get children (): NodeList {
+    const { [LIST]: list } = this
+    if (list) {
+      return list
+    } else {
+      const list = new NodeList(this)
+      this[LIST] = list
+      return list
+    }
+  }
 
   public static takeOver = (parent: Node, items: Node[]): void => {
     for (const item of items) {

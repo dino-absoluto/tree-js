@@ -116,4 +116,8 @@ describe('Node', () => {
       n3, n4
     ])
   })
+  test('serialization', () => {
+    const n = new TNode('1')
+    expect(JSON.stringify(n)).toBe('{"id":"1"}')
+  })
 })
