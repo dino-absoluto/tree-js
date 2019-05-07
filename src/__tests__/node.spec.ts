@@ -101,4 +101,19 @@ describe('Node', () => {
       n2, n1, n4, n3
     ])
   })
+  test('sub tree', () => {
+    const n1 = new TNode('1')
+    const n2 = new TNode('2')
+    const n3 = new TNode('3')
+    const n4 = new TNode('4')
+    n1.append(n2)
+    n2.append(n3)
+    n2.append(n4)
+    expect([...n1.children]).toMatchObject([
+      n2
+    ])
+    expect([...n2.children]).toMatchObject([
+      n3, n4
+    ])
+  })
 })
