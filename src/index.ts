@@ -17,4 +17,6 @@
  *
  */
 /* imports */
+/* reexports */
+export { Node, NodeList } from './node'
 /* code */
