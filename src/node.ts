@@ -61,6 +61,14 @@ export class Node implements ChildNode, ParentNode {
     }
   }
 
+  public get firstChild (): Node | undefined {
+    return this[FIRST]
+  }
+
+  public get lastChild (): Node | undefined {
+    return this[LAST]
+  }
+
   private static takeOver = (parent: Node, items: Node[]): void => {
     for (const item of items) {
       item.remove()
