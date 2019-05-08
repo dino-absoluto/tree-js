@@ -155,48 +155,44 @@ export class Node implements ChildNode, ParentNode {
     return this.children[0]
   }
 
-  private getParent (): ParentPointer {
-    const ptr = this[PARENT]
-    if (!ptr) {
-      throw new Error('This node does not belong to any ParentNode.')
-    }
-    return ptr
-  }
-
   public setParent (loc?: ParentPointer): void {
     this[PARENT] = loc
   }
 
   public remove (): void {
-    try {
-      const { parent, index } = this.getParent()
-      parent.children.splice(index, 1)
-    } catch (err) {
+    const { parent } = this
+    if (!parent) {
+      return
     }
+    const index = this.index as number
+    parent.children.splice(index, 1)
   }
 
   public before (...nodes: Node[]): void {
-    try {
-      const { parent, index } = this.getParent()
-      parent.children.splice(index, 0, ...nodes)
-    } catch (err) {
+    const { parent } = this
+    if (!parent) {
+      return
     }
+    const index = this.index as number
+    parent.children.splice(index, 0, ...nodes)
   }
 
   public after (...nodes: Node[]): void {
-    try {
-      const { parent, index } = this.getParent()
-      parent.children.splice(index + 1, 0, ...nodes)
-    } catch (err) {
+    const { parent } = this
+    if (!parent) {
+      return
     }
+    const index = this.index as number
+    parent.children.splice(index + 1, 0, ...nodes)
   }
 
   public replaceWith (...nodes: Node[]): void {
-    try {
-      const { parent, index } = this.getParent()
-      parent.children.splice(index, 1, ...nodes)
-    } catch (err) {
+    const { parent } = this
+    if (!parent) {
+      return
     }
+    const index = this.index as number
+    parent.children.splice(index, 1, ...nodes)
   }
 
   public append (...nodes: Node[]): void {
