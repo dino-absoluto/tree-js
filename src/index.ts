@@ -18,11 +18,13 @@
  */
 /* imports */
 import * as TreeArray from './tree-array'
+import * as TreeArray2 from './tree-array-2'
 import * as TreeLink from './tree-link'
 
 /* reexports */
 export { ChildNode, ParentNode } from './common'
 export { TreeLink }
 export { TreeArray }
+export { TreeArray2 }
 
 /* code */
