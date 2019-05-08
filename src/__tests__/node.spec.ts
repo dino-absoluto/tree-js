@@ -17,7 +17,7 @@
  *
  */
 /* imports */
-import { Node } from '../node'
+import { Node } from '../tree-link'
 
 class TNode extends Node {
   public id: string

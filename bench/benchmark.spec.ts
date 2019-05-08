@@ -18,9 +18,17 @@
  */
 /* imports */
 import { Suite } from 'benchmark'
-import { Node } from '../src/node'
+import { TreeLink, TreeArray } from '../src'
 
-class TNode extends Node {
+class TArrayNode extends TreeArray.Node {
+  public id: number
+  public constructor (id: number) {
+    super()
+    this.id = id
+  }
+}
+
+class TLinkNode extends TreeLink.Node {
   public id: number
   public constructor (id: number) {
     super()
@@ -31,12 +39,16 @@ class TNode extends Node {
 test('benchmark', () => {
   const suite = new Suite('node')
   const staticArray: number[][] = []
-  const staticTree = new TNode(0)
+  const staticTLinkNode = new TLinkNode(0)
+  const staticTArrayNode = new TArrayNode(0)
   for (let i = 0; i < 100; ++i) {
     const n = Math.random()
     staticArray.push([ n ])
-    staticTree.append(new TNode(n))
+    staticTLinkNode.append(new TLinkNode(n))
+    staticTArrayNode.append(new TArrayNode(n))
   }
+  const staticTLinkNodeChildren = staticTLinkNode.children
+  const staticTArrayNodeChildren = staticTArrayNode.children
   suite
     .add('Array', () => {
       const a = []
@@ -49,12 +61,23 @@ test('benchmark', () => {
         void (i)
       }
     })
-    .add('NodeTree', () => {
-      const a = new TNode(0)
+    .add('TLinkNode', () => {
+      const a = new TLinkNode(0)
       a.append(
-        new TNode(Math.random()),
-        new TNode(Math.random()),
-        new TNode(Math.random())
+        new TLinkNode(Math.random()),
+        new TLinkNode(Math.random()),
+        new TLinkNode(Math.random())
+      )
+      for (const i of a.children) {
+        void (i)
+      }
+    })
+    .add('TArrayNode', () => {
+      const a = new TArrayNode(0)
+      a.append(
+        new TArrayNode(Math.random()),
+        new TArrayNode(Math.random()),
+        new TArrayNode(Math.random())
       )
       for (const i of a.children) {
         void (i)
@@ -65,8 +88,13 @@ test('benchmark', () => {
         void (i)
       }
     })
-    .add('staticNodeTree', () => {
-      for (const i of staticTree.children) {
+    .add('staticTLinkNode', () => {
+      for (const i of staticTLinkNodeChildren) {
+        void (i)
+      }
+    })
+    .add('staticTArrayNode', () => {
+      for (const i of staticTArrayNodeChildren) {
         void (i)
       }
     })

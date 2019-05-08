@@ -17,7 +17,12 @@
  *
  */
 /* imports */
+import * as TreeArray from './tree-array'
+import * as TreeLink from './tree-link'
+
 /* reexports */
 export { ChildNode, ParentNode } from './common'
-export { Node, NodeList } from './node'
+export { TreeLink }
+export { TreeArray }
+
 /* code */
