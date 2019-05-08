@@ -33,34 +33,42 @@ describe('Node', () => {
     const n1 = new TNode('1')
     const n2 = new TNode('2')
     const n3 = new TNode('3')
+    expect(p.childCount).toBe(0)
     p.append(n1)
     p.append(n2)
     p.append(n3)
     expect([...p.children]).toMatchObject([
       n1, n2, n3
     ])
+    expect(p.childCount).toBe(3)
+    expect(p.children.length).toBe(3)
     p.prepend(n3)
     expect([...p.children]).toMatchObject([
       n3, n1, n2
     ])
+    expect(p.childCount).toBe(3)
     p.prepend(n1)
     expect([...p.children]).toMatchObject([
       n1, n3, n2
     ])
+    expect(p.childCount).toBe(3)
     n1.remove()
     n2.remove()
     n3.remove()
     expect([...p.children]).toMatchObject([])
+    expect(p.childCount).toBe(0)
     p.prepend(n1)
     p.prepend(n2)
     p.prepend(n3)
     expect([...p.children]).toMatchObject([
       n3, n2, n1
     ])
+    expect(p.childCount).toBe(3)
     n2.replaceWith(n1)
     expect([...p.children]).toMatchObject([
       n3, n1
     ])
+    expect(p.childCount).toBe(2)
     n2.after(n1)
     n2.before(n1)
     n2.replaceWith(n1)
@@ -68,23 +76,28 @@ describe('Node', () => {
     expect([...p.children]).toMatchObject([
       n3, n1
     ])
+    expect(p.childCount).toBe(2)
     n1.replaceWith()
     expect([...p.children]).toMatchObject([
       n3
     ])
+    expect(p.childCount).toBe(1)
     n3.after(n1)
     n3.after(n2)
     expect([...p.children]).toMatchObject([
       n3, n2, n1
     ])
+    expect(p.childCount).toBe(3)
     n2.before(n1)
     expect([...p.children]).toMatchObject([
       n3, n1, n2
     ])
+    expect(p.childCount).toBe(3)
     n3.replaceWith(n2)
     expect([...p.children]).toMatchObject([
       n2, n1
     ])
+    expect(p.childCount).toBe(2)
   })
   test('simple 2', () => {
     const p = new TNode('parent')
@@ -113,12 +126,37 @@ describe('Node', () => {
     expect([...n1.children]).toMatchObject([
       n2
     ])
+    expect(n2.parent).toBe(n1)
     expect([...n2.children]).toMatchObject([
       n3, n4
     ])
+    expect(n3.parent).toBe(n2)
+    expect(n4.parent).toBe(n2)
   })
   test('serialization', () => {
     const n = new TNode('1')
     expect(JSON.stringify(n)).toBe('{"id":"1"}')
+  })
+  test('entries', () => {
+    const p = new TNode('parent')
+    const n1 = new TNode('1')
+    const n2 = new TNode('2')
+    const n3 = new TNode('3')
+    const n4 = new TNode('4')
+    p.prepend(n3, n4)
+    p.prepend(n2)
+    p.prepend(n1)
+    expect([...p.children.entries()]).toMatchObject([
+      [0, n1],
+      [1, n2],
+      [2, n3],
+      [3, n4]
+    ])
+    expect([...p.children.entriesRight()]).toMatchObject([
+      [3, n4],
+      [2, n3],
+      [1, n2],
+      [0, n1]
+    ])
   })
 })

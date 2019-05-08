@@ -32,6 +32,8 @@ const FIRST = Symbol('first')
 const LAST = Symbol('last')
 /** @internal */
 const LIST = Symbol('node-list')
+/** @internal */
+const COUNT = Symbol('count')
 
 /** @public */
 export class NodeList<T extends Node> {
@@ -48,22 +50,43 @@ export class NodeList<T extends Node> {
     }
   }
 
+  public get length (): number {
+    return this.parent.childCount
+  }
+
   public * entries (): IterableIterator<[number, T]> {
     let i = 0
     for (const node of this) {
       yield [i++, node]
     }
   }
+
+  public * entriesRight (): IterableIterator<[number, T]> {
+    let i = this.length - 1
+    let node = this.parent[LAST]
+    while (node) {
+      yield [i--, node as T]
+      node = node[PREVIOUS]
+    }
+  }
 }
 
 /** @public */
 export class Node implements ChildNode, ParentNode {
+  /** @internal */
   private [NEXT]?: Node
+  /** @internal */
   private [PREVIOUS]?: Node
+  /** @internal */
   private [PARENT]?: Node
+  /** @internal */
   private [FIRST]?: Node
+  /** @internal */
   private [LAST]?: Node
+  /** @internal */
   private [LIST]?: NodeList<Node>
+  /** @internal */
+  private [COUNT]?: number
 
   public get parent (): Node | undefined {
     return this[PARENT]
@@ -84,6 +107,10 @@ export class Node implements ChildNode, ParentNode {
     }
   }
 
+  public get childCount (): number {
+    return this[COUNT] || 0
+  }
+
   public get firstChild (): Node | undefined {
     return this[FIRST]
   }
@@ -92,6 +119,7 @@ export class Node implements ChildNode, ParentNode {
     return this[LAST]
   }
 
+  /** @internal */
   private static takeOver = (parent: Node, items: Node[]): void => {
     for (const item of items) {
       item.remove()
@@ -99,6 +127,7 @@ export class Node implements ChildNode, ParentNode {
     }
   }
 
+  /** @internal */
   private static link = (items: Node[]): void => {
     if (items.length > 1) {
       const end = items.length - 1
@@ -133,6 +162,7 @@ export class Node implements ChildNode, ParentNode {
     this[PREVIOUS] = undefined
     this[NEXT] = undefined
     this[PARENT] = undefined
+    parent[COUNT] = parent.childCount - 1
   }
 
   public before (...items: Node[]): void {
@@ -141,6 +171,7 @@ export class Node implements ChildNode, ParentNode {
       return
     }
     Node.takeOver(parent, items)
+    parent[COUNT] = parent.childCount + items.length
     const { [PREVIOUS]: previous } = this
     items.push(this)
     Node.link(items)
@@ -159,6 +190,7 @@ export class Node implements ChildNode, ParentNode {
       return
     }
     Node.takeOver(parent, items)
+    parent[COUNT] = parent.childCount + items.length
     const { [NEXT]: next } = this
     if (next) {
       items.push(next)
@@ -181,6 +213,7 @@ export class Node implements ChildNode, ParentNode {
       return
     }
     Node.takeOver(parent, items)
+    parent[COUNT] = parent.childCount - 1 + items.length
     const { [PREVIOUS]: previous, [NEXT]: next } = this
     this[PREVIOUS] = undefined
     this[NEXT] = undefined
@@ -206,6 +239,7 @@ export class Node implements ChildNode, ParentNode {
       last.after(...items)
     } else {
       Node.takeOver(this, items)
+      this[COUNT] = items.length
       Node.link(items)
       this[FIRST] = items[0]
       this[LAST] = items[items.length - 1]
@@ -218,6 +252,7 @@ export class Node implements ChildNode, ParentNode {
       first.before(...items)
     } else {
       Node.takeOver(this, items)
+      this[COUNT] = items.length
       Node.link(items)
       this[FIRST] = items[0]
       this[LAST] = items[items.length - 1]

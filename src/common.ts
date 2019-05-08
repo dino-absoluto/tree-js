@@ -21,6 +21,7 @@
 
 /** @public */
 export interface ChildNode {
+  parent?: ParentNode
   remove (): void
   before (...items: ChildNode[]): void
   after (...items: ChildNode[]): void
@@ -29,6 +30,9 @@ export interface ChildNode {
 
 /** @public */
 export interface ParentNode {
+  childCount: number
+  firstChild?: ChildNode
+  lastChild?: ChildNode
   append (...items: ChildNode[]): void
   prepend (...items: ChildNode[]): void
 }
