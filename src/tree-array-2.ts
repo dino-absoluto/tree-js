@@ -33,8 +33,7 @@ interface ParentPointer {
  */
 export class Node implements ChildNode, ParentNode {
   private [PARENT]?: ParentPointer
-  // private [CHILDREN]: Node[] = []
-  public children: Node[] = []
+  private [CHILDREN]: Node[] = []
 
   private setPointer (ptr?: ParentPointer): void {
     this[PARENT] = ptr
@@ -47,8 +46,12 @@ export class Node implements ChildNode, ParentNode {
     }
   }
 
+  public get children (): readonly Node[] {
+    return this[CHILDREN]
+  }
+
   public get firstChild (): Node | undefined {
-    return this.children[0]
+    return this[CHILDREN][0]
   }
 
   public get lastChild (): Node | undefined {
@@ -73,7 +76,7 @@ export class Node implements ChildNode, ParentNode {
 
   private updateIndex (
     start: number = 0,
-    end: number = this.children.length
+    end: number = this[CHILDREN].length
   ): void {
     const { children } = this
     for (let i = start; i < end; ++i) {
@@ -91,7 +94,7 @@ export class Node implements ChildNode, ParentNode {
     }
     const index = this.index as number
     this.setPointer()
-    parent.children.splice(index, 1)
+    parent[CHILDREN].splice(index, 1)
     parent.updateIndex(index)
   }
 
@@ -102,7 +105,7 @@ export class Node implements ChildNode, ParentNode {
     }
     const index = this.index as number
     Node.takeOver(nodes)
-    parent.children.splice(index, 0, ...nodes)
+    parent[CHILDREN].splice(index, 0, ...nodes)
     parent.updateIndex(index)
   }
 
@@ -113,7 +116,7 @@ export class Node implements ChildNode, ParentNode {
     }
     const index = this.index as number
     Node.takeOver(nodes)
-    parent.children.splice(index + 1, 0, ...nodes)
+    parent[CHILDREN].splice(index + 1, 0, ...nodes)
     parent.updateIndex(index + 1)
   }
 
@@ -124,7 +127,7 @@ export class Node implements ChildNode, ParentNode {
     }
     const index = this.index as number
     Node.takeOver(nodes)
-    parent.children.splice(index, 1, ...nodes)
+    parent[CHILDREN].splice(index, 1, ...nodes)
     this.setPointer()
     if (nodes.length === 1) {
       parent.updateIndex(index, index + 1)
@@ -137,13 +140,13 @@ export class Node implements ChildNode, ParentNode {
     const { children } = this
     const start = children.length
     Node.takeOver(nodes)
-    this.children = children.concat(nodes)
+    this[CHILDREN] = children.concat(nodes)
     this.updateIndex(start)
   }
 
   public prepend (...nodes: Node[]): void {
     Node.takeOver(nodes)
-    this.children = nodes.concat(this.children)
+    this[CHILDREN] = nodes.concat(this[CHILDREN])
     this.updateIndex()
   }
 }
