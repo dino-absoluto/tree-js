@@ -28,116 +28,15 @@ interface ParentPointer {
   index: number
 }
 
-export class NodeArray<T extends Node> extends Array<T> {
-  private parent: Node
-  public constructor (parent: Node) {
-    super()
-    this.parent = parent
-  }
-
-  private static takeOver <T extends Node> (nodes: T[]): void {
-    // const { parent } = this
-    for (const node of nodes) {
-      if (node.parent) {
-        node.remove()
-      }
-    }
-  }
-
-  private updateIndex (begin = 0, end = this.length): void {
-    const { parent } = this
-    for (let i = begin; i < end; ++i) {
-      if (!this[i]) {
-        continue
-      }
-      this[i].setParent({
-        parent,
-        index: i
-      })
-    }
-  }
-
-  public push (...nodes: T[]): number {
-    NodeArray.takeOver(nodes)
-    const lastLength = this.length
-    const length = super.push(...nodes)
-    this.updateIndex(lastLength)
-    return length
-  }
-
-  public pop (): T | undefined {
-    const node = super.pop()
-    if (node) {
-      node.setParent(undefined)
-    }
-    return node
-  }
-
-  public shift (): T | undefined {
-    const node = super.shift()
-    if (node) {
-      node.setParent(undefined)
-    }
-    this.updateIndex()
-    return node
-  }
-
-  public unshift (...nodes: T[]): number {
-    NodeArray.takeOver(nodes)
-    const length = super.unshift(...nodes)
-    this.updateIndex()
-    return length
-  }
-
-  public sort (compareFn?: (a: T, b: T) => number): this {
-    super.sort(compareFn)
-    this.updateIndex()
-    return this
-  }
-
-  public reverse (): this {
-    super.reverse()
-    this.updateIndex()
-    return this
-  }
-
-  public splice (
-    start: number,
-    deleteCount?: number,
-    ...nodes: T[]): T[] {
-    NodeArray.takeOver(nodes)
-    const result = super.splice(start, deleteCount || 0, ...nodes)
-    if (start < 0) {
-      start = Math.max(0, this.length + start)
-    }
-    if (deleteCount === nodes.length) {
-      this.updateIndex(start, start + deleteCount)
-    } else {
-      this.updateIndex(start)
-    }
-    for (const node of result) {
-      node.setParent(undefined)
-    }
-    return result
-  }
-}
-
 /**
  * A child node.
  */
 export class Node implements ChildNode, ParentNode {
   private [PARENT]?: ParentPointer
-  public [CHILDREN]: Node[] = new NodeArray<Node>(this)
+  private [CHILDREN]: Node[] = []
 
-  public get index (): number | undefined {
-    const ptr = this[PARENT]
-    if (ptr) {
-      return ptr.index
-    }
-  }
-
-  public get children (): Node[] {
-    return this[CHILDREN]
+  private setPointer (ptr?: ParentPointer): void {
+    this[PARENT] = ptr
   }
 
   public get parent (): Node | undefined {
@@ -147,16 +46,45 @@ export class Node implements ChildNode, ParentNode {
     }
   }
 
-  public get lastChild (): Node | undefined {
-    return this.children[this.children.length - 1]
+  public get children (): readonly Node[] {
+    return this[CHILDREN]
   }
 
   public get firstChild (): Node | undefined {
-    return this.children[0]
+    return this[CHILDREN][0]
   }
 
-  public setParent (loc?: ParentPointer): void {
-    this[PARENT] = loc
+  public get lastChild (): Node | undefined {
+    const { children } = this
+    return children[children.length - 1]
+  }
+
+  public get index (): number | undefined {
+    const ptr = this[PARENT]
+    if (ptr) {
+      return ptr.index
+    }
+  }
+
+  private static takeOver (nodes: Node[]): void {
+    for (const node of nodes) {
+      if (node.parent) {
+        node.remove()
+      }
+    }
+  }
+
+  private updateIndex (
+    start: number = 0,
+    end: number = this[CHILDREN].length
+  ): void {
+    const { children } = this
+    for (let i = start; i < end; ++i) {
+      children[i].setPointer({
+        parent: this,
+        index: i
+      })
+    }
   }
 
   public remove (): void {
@@ -165,7 +93,9 @@ export class Node implements ChildNode, ParentNode {
       return
     }
     const index = this.index as number
-    parent.children.splice(index, 1)
+    this.setPointer()
+    parent[CHILDREN].splice(index, 1)
+    parent.updateIndex(index)
   }
 
   public before (...nodes: Node[]): void {
@@ -174,7 +104,9 @@ export class Node implements ChildNode, ParentNode {
       return
     }
     const index = this.index as number
-    parent.children.splice(index, 0, ...nodes)
+    Node.takeOver(nodes)
+    parent[CHILDREN].splice(index, 0, ...nodes)
+    parent.updateIndex(index)
   }
 
   public after (...nodes: Node[]): void {
@@ -183,7 +115,9 @@ export class Node implements ChildNode, ParentNode {
       return
     }
     const index = this.index as number
-    parent.children.splice(index + 1, 0, ...nodes)
+    Node.takeOver(nodes)
+    parent[CHILDREN].splice(index + 1, 0, ...nodes)
+    parent.updateIndex(index + 1)
   }
 
   public replaceWith (...nodes: Node[]): void {
@@ -192,14 +126,27 @@ export class Node implements ChildNode, ParentNode {
       return
     }
     const index = this.index as number
-    parent.children.splice(index, 1, ...nodes)
+    Node.takeOver(nodes)
+    parent[CHILDREN].splice(index, 1, ...nodes)
+    this.setPointer()
+    if (nodes.length === 1) {
+      parent.updateIndex(index, index + 1)
+    } else {
+      parent.updateIndex(index)
+    }
   }
 
   public append (...nodes: Node[]): void {
-    this.children.push(...nodes)
+    const { children } = this
+    const start = children.length
+    Node.takeOver(nodes)
+    this[CHILDREN] = children.concat(nodes)
+    this.updateIndex(start)
   }
 
   public prepend (...nodes: Node[]): void {
-    this.children.unshift(...nodes)
+    Node.takeOver(nodes)
+    this[CHILDREN] = nodes.concat(this[CHILDREN])
+    this.updateIndex()
   }
 }

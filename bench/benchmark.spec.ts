@@ -19,7 +19,7 @@
 /* imports */
 import * as Benchmark from 'benchmark'
 import * as c from 'kleur'
-import { TreeLink, TreeArray, TreeArray2 } from '../src'
+import { TreeLink, TreeArray } from '../src'
 import round = require('lodash/round')
 
 class TreeArrayNode extends TreeArray.Node {
@@ -30,17 +30,6 @@ class TreeArrayNode extends TreeArray.Node {
   }
   public [Symbol.iterator] (): IterableIterator<this> {
     return this.children[Symbol.iterator]() as IterableIterator<this>
-  }
-}
-
-class TreeArrayNode2 extends TreeArray2.Node {
-  public id: number
-  public constructor (id: number) {
-    super()
-    this.id = id
-  }
-  public [Symbol.iterator] (): IterableIterator<this> {
-    return this.children.values() as IterableIterator<this>
   }
 }
 
@@ -144,9 +133,6 @@ test('append / prepend', () => {
     ['Array', makeTest(
       (id: number) => new CustomArray<unknown>(id)
     )],
-    ['TreeArray #2', makeTest(
-      (id: number) => new TreeArrayNode2(id)
-    )],
     ['TreeArray', makeTest(
       (id: number) => new TreeArrayNode(id)
     )],
@@ -191,9 +177,6 @@ test('loop', () => {
   const tests: [string, () => void][] = [
     ['Array', makeTest(
       (id: number) => new CustomArray<unknown>(id)
-    )],
-    ['TreeArray #2', makeTest(
-      (id: number) => new TreeArrayNode2(id)
     )],
     ['TreeArray', makeTest(
       (id: number) => new TreeArrayNode(id)
@@ -258,10 +241,6 @@ test('synthetic', () => {
     }
   }
   const tests: [string, () => void][] = [
-    ['TreeArray #2', makeTest(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (id: number) => new TreeArrayNode2(id) as any
-    )],
     ['TreeArray', makeTest(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (id: number) => new TreeArrayNode(id) as any
