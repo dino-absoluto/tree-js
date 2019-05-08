@@ -115,11 +115,6 @@ export class NodeArray<T extends Node> extends Array<T> {
 export class Node implements ChildNode, ParentNode {
   private [PARENT]?: ParentPointer
   public children: Node[] = new NodeArray<Node>(this)
-  public constructor () {
-    Object.defineProperty(this, 'ptr', {
-      enumerable: false
-    })
-  }
 
   public get index (): number | undefined {
     const ptr = this[PARENT]
