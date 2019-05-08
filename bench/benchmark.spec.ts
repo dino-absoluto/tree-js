@@ -22,7 +22,7 @@ import * as c from 'kleur'
 import { TreeLink, TreeArray, TreeArray2 } from '../src'
 import round = require('lodash/round')
 
-class TArrayNode extends TreeArray.Node {
+class TreeArrayNode extends TreeArray.Node {
   public id: number
   public constructor (id: number) {
     super()
@@ -33,7 +33,7 @@ class TArrayNode extends TreeArray.Node {
   }
 }
 
-class TArrayNode2 extends TreeArray2.Node {
+class TreeArrayNode2 extends TreeArray2.Node {
   public id: number
   public constructor (id: number) {
     super()
@@ -44,7 +44,7 @@ class TArrayNode2 extends TreeArray2.Node {
   }
 }
 
-class TLinkNode extends TreeLink.Node {
+class TreeLinkNode extends TreeLink.Node {
   public id: number
   public constructor (id: number) {
     super()
@@ -140,33 +140,34 @@ test('append / prepend', () => {
       }
     }
   }
+  const tests: [string, () => void][] = [
+    ['Array', makeTest(
+      (id: number) => new CustomArray<unknown>(id)
+    )],
+    ['TreeArray #2', makeTest(
+      (id: number) => new TreeArrayNode2(id)
+    )],
+    ['TreeArray', makeTest(
+      (id: number) => new TreeArrayNode(id)
+    )],
+    ['TreeLink', makeTest(
+      (id: number) => new TreeLinkNode(id)
+    )]
+  ]
+  for (const [ name, test ] of tests) {
+    suite.add(name, test)
+  }
   suite
-    .add('Array', makeTest(
-      (id: number) =>
-        new CustomArray<unknown>(id)
-    ))
-    .add('TLinkNode', makeTest(
-      (id: number) =>
-        new TLinkNode(id)
-    ))
-    .add('TArrayNode', makeTest(
-      (id: number) =>
-        new TArrayNode(id)
-    ))
-    .add('TArrayNode2', makeTest(
-      (id: number) =>
-        new TArrayNode2(id)
-    ))
     .on('cycle', (event: Benchmark.Event) => {
       const target = event.target as
         Benchmark & Benchmark.Suite & typeof Benchmark.options
       message.push(formatBench(target))
     })
-    .on('complete', function () {
-      console.log(message.join('\n'))
-      console.log('Fastest is ' +
+    .on('complete', () => {
+      message.push('Fastest is ' +
         c.magenta(suite.filter('fastest')
-          .map((i: { name: string }) => i.name) + ''))
+          .map((i: { name: string }) => i.name).join(', ')))
+      console.log(message.join('\n'))
     })
     .run({})
 })
@@ -187,33 +188,34 @@ test('loop', () => {
       }
     }
   }
+  const tests: [string, () => void][] = [
+    ['Array', makeTest(
+      (id: number) => new CustomArray<unknown>(id)
+    )],
+    ['TreeArray #2', makeTest(
+      (id: number) => new TreeArrayNode2(id)
+    )],
+    ['TreeArray', makeTest(
+      (id: number) => new TreeArrayNode(id)
+    )],
+    ['TreeLink', makeTest(
+      (id: number) => new TreeLinkNode(id)
+    )]
+  ]
+  for (const [ name, test ] of tests) {
+    suite.add(name, test)
+  }
   suite
-    .add('Array', makeTest(
-      (id: number) =>
-        new CustomArray<unknown>(id)
-    ))
-    .add('TLinkNode', makeTest(
-      (id: number) =>
-        new TLinkNode(id)
-    ))
-    .add('TArrayNode', makeTest(
-      (id: number) =>
-        new TArrayNode(id)
-    ))
-    .add('TArrayNode2', makeTest(
-      (id: number) =>
-        new TArrayNode2(id)
-    ))
     .on('cycle', (event: Benchmark.Event) => {
       const target = event.target as
         Benchmark & Benchmark.Suite & typeof Benchmark.options
       message.push(formatBench(target))
     })
-    .on('complete', function () {
-      console.log(message.join('\n'))
-      console.log('Fastest is ' +
+    .on('complete', () => {
+      message.push('Fastest is ' +
         c.magenta(suite.filter('fastest')
-          .map((i: { name: string }) => i.name) + ''))
+          .map((i: { name: string }) => i.name).join(', ')))
+      console.log(message.join('\n'))
     })
-    .run({})
+    .run()
 })
