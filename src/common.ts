@@ -30,7 +30,10 @@ export interface ChildNode {
 
 /** @public */
 export interface ParentNode {
-  childCount: number
+  children: {
+    [Symbol.iterator] (): IterableIterator<ChildNode>
+    length: number
+  }
   firstChild?: ChildNode
   lastChild?: ChildNode
   append (...items: ChildNode[]): void

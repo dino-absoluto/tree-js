@@ -51,7 +51,7 @@ export class NodeList<T extends Node> {
   }
 
   public get length (): number {
-    return this.parent.childCount
+    return this.parent[COUNT] || 0
   }
 
   public * entries (): IterableIterator<[number, T]> {
@@ -107,10 +107,6 @@ export class Node implements ChildNode, ParentNode {
     }
   }
 
-  public get childCount (): number {
-    return this[COUNT] || 0
-  }
-
   public get firstChild (): Node | undefined {
     return this[FIRST]
   }
@@ -162,7 +158,7 @@ export class Node implements ChildNode, ParentNode {
     this[PREVIOUS] = undefined
     this[NEXT] = undefined
     this[PARENT] = undefined
-    parent[COUNT] = parent.childCount - 1
+    parent[COUNT] = parent.children.length - 1
   }
 
   public before (...items: Node[]): void {
@@ -171,7 +167,7 @@ export class Node implements ChildNode, ParentNode {
       return
     }
     Node.takeOver(parent, items)
-    parent[COUNT] = parent.childCount + items.length
+    parent[COUNT] = parent.children.length + items.length
     const { [PREVIOUS]: previous } = this
     items.push(this)
     Node.link(items)
@@ -190,7 +186,7 @@ export class Node implements ChildNode, ParentNode {
       return
     }
     Node.takeOver(parent, items)
-    parent[COUNT] = parent.childCount + items.length
+    parent[COUNT] = parent.children.length + items.length
     const { [NEXT]: next } = this
     if (next) {
       items.push(next)
@@ -213,7 +209,7 @@ export class Node implements ChildNode, ParentNode {
       return
     }
     Node.takeOver(parent, items)
-    parent[COUNT] = parent.childCount - 1 + items.length
+    parent[COUNT] = parent.children.length - 1 + items.length
     const { [PREVIOUS]: previous, [NEXT]: next } = this
     this[PREVIOUS] = undefined
     this[NEXT] = undefined
