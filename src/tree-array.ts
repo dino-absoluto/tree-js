@@ -35,6 +35,15 @@ export class NodeArray<T extends Node> extends Array<T> {
     this.parent = parent
   }
 
+  private static takeOver <T extends Node> (nodes: T[]): void {
+    // const { parent } = this
+    for (const node of nodes) {
+      if (node.parent) {
+        node.remove()
+      }
+    }
+  }
+
   private updateIndex (begin = 0, end = this.length): void {
     const { parent } = this
     for (let i = begin; i < end; ++i) {
@@ -49,6 +58,7 @@ export class NodeArray<T extends Node> extends Array<T> {
   }
 
   public push (...nodes: T[]): number {
+    NodeArray.takeOver(nodes)
     const lastLength = this.length
     const length = super.push(...nodes)
     this.updateIndex(lastLength)
@@ -73,6 +83,7 @@ export class NodeArray<T extends Node> extends Array<T> {
   }
 
   public unshift (...nodes: T[]): number {
+    NodeArray.takeOver(nodes)
     const length = super.unshift(...nodes)
     this.updateIndex()
     return length
@@ -94,6 +105,7 @@ export class NodeArray<T extends Node> extends Array<T> {
     start: number,
     deleteCount?: number,
     ...nodes: T[]): T[] {
+    NodeArray.takeOver(nodes)
     const result = super.splice(start, deleteCount || 0, ...nodes)
     if (start < 0) {
       start = Math.max(0, this.length + start)
@@ -152,37 +164,39 @@ export class Node implements ChildNode, ParentNode {
   }
 
   public setParent (loc?: ParentPointer): void {
-    const ptr = this[PARENT]
-    if (ptr && loc) {
-      if (loc.parent === ptr.parent) {
-        ptr.index = loc.index
-      } else {
-        this.remove()
-        this[PARENT] = loc
-      }
-      return
-    }
     this[PARENT] = loc
   }
 
   public remove (): void {
-    const { parent, index } = this.getParent()
-    parent.children.splice(index, 1)
+    try {
+      const { parent, index } = this.getParent()
+      parent.children.splice(index, 1)
+    } catch (err) {
+    }
   }
 
   public before (...nodes: Node[]): void {
-    const { parent, index } = this.getParent()
-    parent.children.splice(index, 0, ...nodes)
+    try {
+      const { parent, index } = this.getParent()
+      parent.children.splice(index, 0, ...nodes)
+    } catch (err) {
+    }
   }
 
   public after (...nodes: Node[]): void {
-    const { parent, index } = this.getParent()
-    parent.children.splice(index + 1, 0, ...nodes)
+    try {
+      const { parent, index } = this.getParent()
+      parent.children.splice(index + 1, 0, ...nodes)
+    } catch (err) {
+    }
   }
 
   public replaceWith (...nodes: Node[]): void {
-    const { parent, index } = this.getParent()
-    parent.children.splice(index, 1, ...nodes)
+    try {
+      const { parent, index } = this.getParent()
+      parent.children.splice(index, 1, ...nodes)
+    } catch (err) {
+    }
   }
 
   public append (...nodes: Node[]): void {
