@@ -40,7 +40,7 @@ class TArrayNode2 extends TreeArray2.Node {
     this.id = id
   }
   public [Symbol.iterator] (): IterableIterator<this> {
-    return this.children[Symbol.iterator]() as IterableIterator<this>
+    return this.children.values() as IterableIterator<this>
   }
 }
 
@@ -83,27 +83,25 @@ Object.assign(Benchmark.options, {
 interface Target<T> {
   append (...values: T[]): void
   prepend (...values: T[]): void
-  [Symbol.iterator] (): IterableIterator<T>
+  children: {
+    [Symbol.iterator] (): IterableIterator<T>
+  }
 }
 
 class CustomArray<T> implements Target<T> {
-  public data: T[] = []
+  public children: T[] = []
   public id: number
 
   public constructor (id: number) {
     this.id = id
   }
 
-  public [Symbol.iterator] (): IterableIterator<T> {
-    return this.data.values()
-  }
-
   public append (...values: T[]): void {
-    this.data.push(...values)
+    this.children.push(...values)
   }
 
   public prepend (...values: T[]): void {
-    this.data.unshift(...values)
+    this.children.unshift(...values)
   }
 }
 
@@ -137,8 +135,55 @@ test('append / prepend', () => {
       )
       a.prepend(create(Math.random()))
       a.prepend(create(Math.random()))
-      for (const i of a) {
+      for (const i of a.children) {
         void (i)
+      }
+    }
+  }
+  suite
+    .add('Array', makeTest(
+      (id: number) =>
+        new CustomArray<unknown>(id)
+    ))
+    .add('TLinkNode', makeTest(
+      (id: number) =>
+        new TLinkNode(id)
+    ))
+    .add('TArrayNode', makeTest(
+      (id: number) =>
+        new TArrayNode(id)
+    ))
+    .add('TArrayNode2', makeTest(
+      (id: number) =>
+        new TArrayNode2(id)
+    ))
+    .on('cycle', (event: Benchmark.Event) => {
+      const target = event.target as
+        Benchmark & Benchmark.Suite & typeof Benchmark.options
+      message.push(formatBench(target))
+    })
+    .on('complete', function () {
+      console.log(message.join('\n'))
+      console.log('Fastest is ' +
+        c.magenta(suite.filter('fastest')
+          .map((i: { name: string }) => i.name) + ''))
+    })
+    .run({})
+})
+
+test('loop', () => {
+  const suite = new Benchmark.Suite('node')
+  let message: string[] = []
+  const makeTest =
+  (create: (data: number) => Target<unknown>): () => void => {
+    const data = create(0)
+    for (let i = 0; i < 1000; ++i) {
+      data.append(create(Math.random()))
+    }
+    const children = data.children
+    return () => {
+      for (const i of children) {
+        void ((i as { id: number }).id)
       }
     }
   }
