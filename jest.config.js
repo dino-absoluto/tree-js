@@ -18,15 +18,21 @@
  */
 /* imports */
 /* exports */
+const isBenchmark = process.env['BENCHMARK']
+
 module.exports = {
   testEnvironment: 'node',
   setupFilesAfterEnv: [
     '<rootDir>/config/jest--setup-working-dir.js'
   ],
-  roots: [
-    '<rootDir>/src/',
-    '<rootDir>/tests/'
-  ],
+  roots: (isBenchmark
+    ? [ '<rootDir>/bench' ]
+    : [
+      '<rootDir>/src/',
+      '<rootDir>/tests/'
+    ]
+  ),
+  maxConcurrency: isBenchmark ? 1 : undefined,
   moduleDirectories: [
     'node_modules',
     '<rootDir>/jest/mods'

@@ -11,6 +11,7 @@
   "scripts": {
     "lint": "eslint --ext .js,.ts src",
     "test": "jest",
+    "bench": "env BENCHMARK=1 jest",
     "prepublishOnly": "npm run build -- --env.prod && npm run build:api",
     "build": "webpack",
     "build:api": "tsc -d --emitDeclarationOnly && api-extractor run --local --verbose"
@@ -31,10 +32,12 @@
   "homepage": "https://github.com/dino-absoluto/tree-js#readme",
   "devDependencies": {
     "@microsoft/api-extractor": "^7.1.4",
+    "@types/benchmark": "^1.0.31",
     "@types/jest": "^24.0.12",
     "@types/node": "^12.0.0",
     "@typescript-eslint/eslint-plugin": "^1.7.0",
     "@typescript-eslint/parser": "^1.7.0",
+    "benchmark": "^2.1.4",
     "coveralls": "^3.0.3",
     "del": "^4.1.1",
     "eslint": "^5.16.0",
@@ -51,5 +54,6 @@
     "webpack": "^4.30.0",
     "webpack-cli": "^3.3.2",
     "webpack-node-externals": "^1.7.2"
-  }
+  },
+  "dependencies": {}
 }
