@@ -43,6 +43,14 @@ export class NodeList<T extends Node> {
   }
 
   public * [Symbol.iterator] (): IterableIterator<T> {
+    yield * this.values()
+  }
+
+  public get length (): number {
+    return this.parent[COUNT] || 0
+  }
+
+  public * values (): IterableIterator<T> {
     let node = this.parent[FIRST]
     while (node) {
       yield node as T
@@ -50,23 +58,25 @@ export class NodeList<T extends Node> {
     }
   }
 
-  public get length (): number {
-    return this.parent[COUNT] || 0
+  public * valuesRight (): IterableIterator<T> {
+    let node = this.parent[LAST]
+    while (node) {
+      yield node as T
+      node = node[PREVIOUS]
+    }
   }
 
   public * entries (): IterableIterator<[number, T]> {
     let i = 0
-    for (const node of this) {
+    for (const node of this.values()) {
       yield [i++, node]
     }
   }
 
   public * entriesRight (): IterableIterator<[number, T]> {
     let i = this.length - 1
-    let node = this.parent[LAST]
-    while (node) {
-      yield [i--, node as T]
-      node = node[PREVIOUS]
+    for (const node of this.valuesRight()) {
+      yield [i--, node]
     }
   }
 }
