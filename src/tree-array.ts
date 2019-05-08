@@ -21,6 +21,7 @@ import { ChildNode, ParentNode } from './common'
 
 /* code */
 const PARENT = Symbol('parent')
+const CHILDREN = Symbol('children')
 
 interface ParentPointer {
   parent: Node
@@ -114,7 +115,7 @@ export class NodeArray<T extends Node> extends Array<T> {
  */
 export class Node implements ChildNode, ParentNode {
   private [PARENT]?: ParentPointer
-  public children: Node[] = new NodeArray<Node>(this)
+  public [CHILDREN]: Node[] = new NodeArray<Node>(this)
 
   public get index (): number | undefined {
     const ptr = this[PARENT]
@@ -123,11 +124,23 @@ export class Node implements ChildNode, ParentNode {
     }
   }
 
+  public get children (): Node[] {
+    return this[CHILDREN]
+  }
+
   public get parent (): Node | undefined {
     const ptr = this[PARENT]
     if (ptr) {
       return ptr.parent
     }
+  }
+
+  public get lastChild (): Node | undefined {
+    return this.children[this.children.length - 1]
+  }
+
+  public get firstChild (): Node | undefined {
+    return this.children[0]
   }
 
   private getParent (): ParentPointer {

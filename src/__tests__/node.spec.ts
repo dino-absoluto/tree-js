@@ -17,17 +17,29 @@
  *
  */
 /* imports */
-import { Node } from '../tree-link'
+import {
+  TreeLink,
+  TreeArray,
+  TreeArray2
+} from '..'
 
-class TNode extends Node {
-  public id: string
-  public constructor (text: string) {
-    super()
-    this.id = text
+describe.each([
+  TreeLink.Node,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  TreeArray.Node as any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  TreeArray2.Node as any
+])('Node', (Node: typeof TreeLink.Node) => {
+  class TNode extends Node {
+    public id: string
+    public constructor (text: string) {
+      super()
+      this.id = text
+    }
+    public toJSON (): string {
+      return this.id
+    }
   }
-}
-
-describe('Node', () => {
   test('simple', () => {
     const p = new TNode('parent')
     const n1 = new TNode('1')
@@ -99,7 +111,7 @@ describe('Node', () => {
     ])
     expect(p.children.length).toBe(2)
   })
-  test('simple 2', () => {
+  test('simple #2', () => {
     const p = new TNode('parent')
     const n1 = new TNode('1')
     const n2 = new TNode('2')
@@ -135,7 +147,7 @@ describe('Node', () => {
   })
   test('serialization', () => {
     const n = new TNode('1')
-    expect(JSON.stringify(n)).toBe('{"id":"1"}')
+    expect(JSON.stringify(n)).toBe('"1"')
   })
   test('entries', () => {
     const p = new TNode('parent')
@@ -151,12 +163,6 @@ describe('Node', () => {
       [1, n2],
       [2, n3],
       [3, n4]
-    ])
-    expect([...p.children.entriesRight()]).toMatchObject([
-      [3, n4],
-      [2, n3],
-      [1, n2],
-      [0, n1]
     ])
   })
 })
