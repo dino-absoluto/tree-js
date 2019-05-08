@@ -30,20 +30,20 @@ class TNode extends Node {
 
 test('benchmark', () => {
   const suite = new Suite('node')
-  const staticArray: number[] = []
+  const staticArray: number[][] = []
   const staticTree = new TNode(0)
   for (let i = 0; i < 100; ++i) {
     const n = Math.random()
-    staticArray.push(n)
+    staticArray.push([ n ])
     staticTree.append(new TNode(n))
   }
   suite
     .add('Array', () => {
       const a = []
       a.push(
-        Math.random(),
-        Math.random(),
-        Math.random()
+        [ Math.random() ],
+        [ Math.random() ],
+        [ Math.random() ]
       )
       for (const i of a) {
         void (i)
