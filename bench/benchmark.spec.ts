@@ -19,7 +19,7 @@
 /* imports */
 import * as Benchmark from 'benchmark'
 import * as c from 'kleur'
-import { TreeLink, TreeArray } from '../src'
+import { TreeLink, TreeArray, TreeArray2 } from '../src'
 import round = require('lodash/round')
 
 class TArrayNode extends TreeArray.Node {
@@ -27,6 +27,20 @@ class TArrayNode extends TreeArray.Node {
   public constructor (id: number) {
     super()
     this.id = id
+  }
+  public [Symbol.iterator] (): IterableIterator<this> {
+    return this.children[Symbol.iterator]() as IterableIterator<this>
+  }
+}
+
+class TArrayNode2 extends TreeArray2.Node {
+  public id: number
+  public constructor (id: number) {
+    super()
+    this.id = id
+  }
+  public [Symbol.iterator] (): IterableIterator<this> {
+    return this.children[Symbol.iterator]() as IterableIterator<this>
   }
 }
 
@@ -36,88 +50,119 @@ class TLinkNode extends TreeLink.Node {
     super()
     this.id = id
   }
+  public [Symbol.iterator] (): IterableIterator<this> {
+    return this.children[Symbol.iterator]() as IterableIterator<this>
+  }
 }
 
+type BenchResult = Benchmark & typeof Benchmark.options
+
+const formatBench = (target: BenchResult): string => {
+  return `${
+    c.magenta(target.name || 'unnamed')
+  } × ${
+    c.yellow(Benchmark.formatNumber(Math.round(target.hz)))
+  } ${c.green('ops/sec')} ${
+    c.yellow('±' + round(target.stats.rme, 2) + '%')
+  } (${
+    c.yellow(target.stats.sample.length)
+  } ${c.green('runs sampled')})`
+}
+
+// eslint-disable-next-line
+//*
 Object.assign(Benchmark.options, {
   maxTime: 1,
   minSamples: 1
 })
+// eslint-disable-next-line
+/*/
+// Do nothing
+// */
 
-test('benchmark', () => {
-  const suite = new Benchmark.Suite('node')
-  const staticArray: number[][] = []
-  const staticTLinkNode = new TLinkNode(0)
-  const staticTArrayNode = new TArrayNode(0)
-  for (let i = 0; i < 100; ++i) {
-    const n = Math.random()
-    staticArray.push([ n ])
-    staticTLinkNode.append(new TLinkNode(n))
-    staticTArrayNode.append(new TArrayNode(n))
+interface Target<T> {
+  append (...values: T[]): void
+  prepend (...values: T[]): void
+  [Symbol.iterator] (): IterableIterator<T>
+}
+
+class CustomArray<T> implements Target<T> {
+  public data: T[] = []
+  public id: number
+
+  public constructor (id: number) {
+    this.id = id
   }
-  const staticTLinkNodeChildren = staticTLinkNode.children
-  const staticTArrayNodeChildren = staticTArrayNode.children
+
+  public [Symbol.iterator] (): IterableIterator<T> {
+    return this.data.values()
+  }
+
+  public append (...values: T[]): void {
+    this.data.push(...values)
+  }
+
+  public prepend (...values: T[]): void {
+    this.data.unshift(...values)
+  }
+}
+
+test('append / prepend', () => {
+  const suite = new Benchmark.Suite('node')
   let message: string[] = []
-  suite
-    .add('Array', () => {
-      const a = []
-      a.push(
-        [ Math.random() ],
-        [ Math.random() ],
-        [ Math.random() ]
+  const makeTest =
+  (create: (data: number) => Target<unknown>): () => void => {
+    return () => {
+      const a = create(0)
+      a.append(
+        create(Math.random()),
+        create(Math.random()),
+        create(Math.random()),
+        create(Math.random()),
+        create(Math.random()),
+        create(Math.random())
       )
+      a.append(create(Math.random()))
+      a.append(create(Math.random()))
+      a.append(create(Math.random()))
+      a.append(create(Math.random()))
+      a.append(create(Math.random()))
+      a.append(create(Math.random()))
+      a.append(create(Math.random()))
+      a.append(create(Math.random()))
+      a.prepend(
+        create(Math.random()),
+        create(Math.random()),
+        create(Math.random())
+      )
+      a.prepend(create(Math.random()))
+      a.prepend(create(Math.random()))
       for (const i of a) {
         void (i)
       }
-    })
-    .add('TLinkNode', () => {
-      const a = new TLinkNode(0)
-      a.append(
-        new TLinkNode(Math.random()),
-        new TLinkNode(Math.random()),
-        new TLinkNode(Math.random())
-      )
-      for (const i of a.children) {
-        void (i)
-      }
-    })
-    .add('TArrayNode', () => {
-      const a = new TArrayNode(0)
-      a.append(
-        new TArrayNode(Math.random()),
-        new TArrayNode(Math.random()),
-        new TArrayNode(Math.random())
-      )
-      for (const i of a.children) {
-        void (i)
-      }
-    })
-    .add('staticArray', () => {
-      for (const i of staticArray) {
-        void (i)
-      }
-    })
-    .add('staticTLinkNode', () => {
-      for (const i of staticTLinkNodeChildren) {
-        void (i)
-      }
-    })
-    .add('staticTArrayNode', () => {
-      for (const i of staticTArrayNodeChildren) {
-        void (i)
-      }
-    })
+    }
+  }
+  suite
+    .add('Array', makeTest(
+      (id: number) =>
+        new CustomArray<unknown>(id)
+    ))
+    .add('TLinkNode', makeTest(
+      (id: number) =>
+        new TLinkNode(id)
+    ))
+    .add('TArrayNode', makeTest(
+      (id: number) =>
+        new TArrayNode(id)
+    ))
+    .add('TArrayNode2', makeTest(
+      (id: number) =>
+        new TArrayNode2(id)
+    ))
     .on('cycle', (event: Benchmark.Event) => {
       const target = event.target as
         Benchmark & Benchmark.Suite & typeof Benchmark.options
-      message.push(`${
-        c.magenta(target.name || 'unnamed')
-      } × ${
-        c.yellow(Benchmark.formatNumber(Math.round(target.hz)))
-      } ${c.green('ops/sec')} ${
-        c.yellow('±' + round(target.stats.rme, 2) + '%')
-      } (${
-        c.yellow(target.stats.sample.length)
-      } ${c.green('runs sampled')})`)
+      message.push(formatBench(target))
     })
     .on('complete', function () {
       console.log(message.join('\n'))
