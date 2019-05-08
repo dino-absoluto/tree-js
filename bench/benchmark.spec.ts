@@ -17,8 +17,10 @@
  *
  */
 /* imports */
-import { Suite } from 'benchmark'
+import * as Benchmark from 'benchmark'
+import * as c from 'kleur'
 import { TreeLink, TreeArray } from '../src'
+import round = require('lodash/round')
 
 class TArrayNode extends TreeArray.Node {
   public id: number
@@ -36,8 +38,13 @@ class TLinkNode extends TreeLink.Node {
   }
 }
 
+Object.assign(Benchmark.options, {
+  maxTime: 1,
+  minSamples: 1
+})
+
 test('benchmark', () => {
-  const suite = new Suite('node')
+  const suite = new Benchmark.Suite('node')
   const staticArray: number[][] = []
   const staticTLinkNode = new TLinkNode(0)
   const staticTArrayNode = new TArrayNode(0)
@@ -49,6 +56,7 @@ test('benchmark', () => {
   }
   const staticTLinkNodeChildren = staticTLinkNode.children
   const staticTArrayNodeChildren = staticTArrayNode.children
+  let message: string[] = []
   suite
     .add('Array', () => {
       const a = []
@@ -98,13 +106,24 @@ test('benchmark', () => {
         void (i)
       }
     })
-    .on('cycle', (event: Event) => {
-      console.log(String(event.target))
+    .on('cycle', (event: Benchmark.Event) => {
+      const target = event.target as
+        Benchmark & Benchmark.Suite & typeof Benchmark.options
+      message.push(`${
+        c.magenta(target.name || 'unnamed')
+      } × ${
+        c.yellow(Benchmark.formatNumber(Math.round(target.hz)))
+      } ${c.green('ops/sec')} ${
+        c.yellow('±' + round(target.stats.rme, 2) + '%')
+      } (${
+        c.yellow(target.stats.sample.length)
+      } ${c.green('runs sampled')})`)
     })
     .on('complete', function () {
+      console.log(message.join('\n'))
       console.log('Fastest is ' +
-        suite.filter('fastest')
-          .map((i: { name: string }) => i.name))
+        c.magenta(suite.filter('fastest')
+          .map((i: { name: string }) => i.name) + ''))
     })
     .run({})
 })
