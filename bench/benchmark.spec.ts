@@ -219,3 +219,71 @@ test('loop', () => {
     })
     .run()
 })
+
+test('synthetic', () => {
+  const suite = new Benchmark.Suite('node')
+  let message: string[] = []
+  const makeTest =
+  (create: (data: number) => TreeLinkNode): () => void => {
+    return () => {
+      const data = create(0)
+      const n1 = create(1)
+      const n2 = create(2)
+      const n3 = create(3)
+      const n4 = create(4)
+      const n5 = create(5)
+      data.append(n1)
+      data.append(n2)
+      data.append(n3, n4, n5)
+      data.prepend(n1)
+      data.prepend(n2)
+      n1.remove()
+      n2.remove()
+      n3.remove()
+      n4.remove()
+      n5.remove()
+      data.append(n1)
+      // #1
+      n1.before(n2)
+      n2.after(n3)
+      n3.replaceWith(n4)
+      n4.before(n5)
+      n5.after(n3)
+      // #2
+      n1.after(n2)
+      n2.before(n3)
+      n3.replaceWith(n4)
+      n4.after(n5)
+      n5.before(n3)
+    }
+  }
+  const tests: [string, () => void][] = [
+    ['TreeArray #2', makeTest(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (id: number) => new TreeArrayNode2(id) as any
+    )],
+    ['TreeArray', makeTest(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (id: number) => new TreeArrayNode(id) as any
+    )],
+    ['TreeLink', makeTest(
+      (id: number) => new TreeLinkNode(id)
+    )]
+  ]
+  for (const [ name, test ] of tests) {
+    suite.add(name, test)
+  }
+  suite
+    .on('cycle', (event: Benchmark.Event) => {
+      const target = event.target as
+        Benchmark & Benchmark.Suite & typeof Benchmark.options
+      message.push(formatBench(target))
+    })
+    .on('complete', () => {
+      message.push('Fastest is ' +
+        c.magenta(suite.filter('fastest')
+          .map((i: { name: string }) => i.name).join(', ')))
+      console.log(message.join('\n'))
+    })
+    .run()
+})
