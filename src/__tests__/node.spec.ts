@@ -17,16 +17,16 @@
  *
  */
 /* imports */
-import {
-  TreeLink,
-  TreeLinkStatic,
-  TreeArray
-} from '..'
+import * as TreeLink from '../tree-link'
+import * as TreeLinkStatic from '../tree-link-static'
+import * as TreeArray from '../tree-array'
 
 describe.each([
   TreeLink.Node,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  TreeArray.Node as any
+  TreeArray.Node as any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  TreeLinkStatic.Node as any
 ])('Node', (Node: typeof TreeLink.Node) => {
   class TNode extends Node {
     public id: string

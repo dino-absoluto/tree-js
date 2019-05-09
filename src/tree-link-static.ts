@@ -164,8 +164,8 @@ const before = <T extends TNode> (self: T, ...newNodes: T[]): void => {
     return
   }
   parent[COUNT] = parent[COUNT] as number + newNodes.length
+  takeOver(parent, newNodes)
   const { [PREVIOUS]: previous } = self
-  takeOver(self, newNodes)
   const first = newNodes[0]
   const last = newNodes[newNodes.length - 1]
   last[NEXT] = self
@@ -184,8 +184,8 @@ const after = <T extends TNode> (self: T, ...newNodes: T[]): void => {
     return
   }
   parent[COUNT] = parent[COUNT] as number + newNodes.length
+  takeOver(parent, newNodes)
   const { [NEXT]: next } = self
-  takeOver(self, newNodes)
   const first = newNodes[0]
   const last = newNodes[newNodes.length - 1]
   self[NEXT] = first
@@ -200,13 +200,17 @@ const after = <T extends TNode> (self: T, ...newNodes: T[]): void => {
 
 const replaceWith = <T extends TNode> (self: T, ...newNodes: T[]): void => {
   const { [PARENT]: parent } = self
-  if (!parent || !newNodes.length) {
+  if (!parent) {
     return
   }
-  parent[COUNT] = parent[COUNT] as number + newNodes.length - 1
+  if (!newNodes.length) {
+    remove(self)
+    return
+  }
+  parent[COUNT] = parent[COUNT] as number + newNodes.length
+  takeOver(parent, newNodes)
   const { [PREVIOUS]: previous, [NEXT]: next } = self
   remove(self)
-  takeOver(self, newNodes)
   const first = newNodes[0]
   const last = newNodes[newNodes.length - 1]
   if (next) {
