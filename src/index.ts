@@ -17,14 +17,7 @@
  *
  */
 /* imports */
-import * as TreeLink from './tree-link'
-import * as TreeLinkStatic from './tree-link-static'
-import * as TreeArray from './tree-array'
-
 /* reexports */
-export { ChildNode, ParentNode } from './common'
-export { TreeLink }
-export { TreeLinkStatic }
-export { TreeArray }
+export * from './tree-link-static'
 
 /* code */

@@ -19,11 +19,9 @@
 /* imports */
 import * as Benchmark from 'benchmark'
 import * as c from 'kleur'
-import {
-  TreeLink,
-  TreeLinkStatic,
-  TreeArray
-} from '../src'
+import * as TreeLink from '../src/tree-link'
+import * as TreeLinkStatic from '../src/tree-link-static'
+import * as TreeArray from '../src/tree-array'
 import round = require('lodash/round')
 
 class TreeArrayNode extends TreeArray.Node {
@@ -261,6 +259,7 @@ test('synthetic', () => {
       (id: number) => new TreeLinkNode(id)
     )],
     ['TreeLinkStatic', makeTest(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (id: number) => new TreeLinkNodeStatic(id) as any
     )]
   ]
