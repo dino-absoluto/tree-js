@@ -20,7 +20,6 @@
 import * as Benchmark from 'benchmark'
 import * as c from 'kleur'
 import * as TreeLink from '../src/tree-link'
-import * as TreeLinkStatic from '../src/tree-link-static'
 import * as TreeArray from '../src/tree-array'
 import round = require('lodash/round')
 
@@ -33,14 +32,6 @@ class TreeArrayNode extends TreeArray.Node {
 }
 
 class TreeLinkNode extends TreeLink.Node {
-  public id: number
-  public constructor (id: number) {
-    super()
-    this.id = id
-  }
-}
-
-class TreeLinkNodeStatic extends TreeLinkStatic.Node {
   public id: number
   public constructor (id: number) {
     super()
@@ -143,9 +134,6 @@ test('append / prepend', () => {
     )],
     ['TreeLink', makeTest(
       (id: number) => new TreeLinkNode(id)
-    )],
-    ['TreeLinkStatic', makeTest(
-      (id: number) => new TreeLinkNodeStatic(id)
     )]
   ]
   for (const [ name, test ] of tests) {
@@ -191,9 +179,6 @@ test('loop', () => {
     )],
     ['TreeLink', makeTest(
       (id: number) => new TreeLinkNode(id)
-    )],
-    ['TreeLinkStatic', makeTest(
-      (id: number) => new TreeLinkNodeStatic(id)
     )]
   ]
   for (const [ name, test ] of tests) {
@@ -258,10 +243,6 @@ test('synthetic', () => {
     )],
     ['TreeLink', makeTest(
       (id: number) => new TreeLinkNode(id)
-    )],
-    ['TreeLinkStatic', makeTest(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (id: number) => new TreeLinkNodeStatic(id) as any
     )]
   ]
   for (const [ name, test ] of tests) {

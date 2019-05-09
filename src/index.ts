@@ -18,6 +18,6 @@
  */
 /* imports */
 /* reexports */
-export * from './tree-link-static'
+export * from './tree-link'
 
 /* code */

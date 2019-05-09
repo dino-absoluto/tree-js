@@ -17,7 +17,7 @@
  *
  */
 /* imports */
-import { Node, PARENT_CONSTRAINT } from '../tree-link-static'
+import { Node, PARENT_CONSTRAINT } from '../tree-link'
 
 class TNode extends Node {
   public id: string

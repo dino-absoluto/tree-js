@@ -20,23 +20,30 @@
 import { ChildNode, ParentNode } from './common'
 /* code */
 
-/** @internal */
-const NEXT = Symbol('next')
-/** @internal */
-const PREVIOUS = Symbol('previous')
-/** @internal */
-const PARENT = Symbol('parent')
-/** @internal */
-const FIRST = Symbol('first')
-/** @internal */
-const LAST = Symbol('last')
-/** @internal */
-const LIST = Symbol('node-list')
-/** @internal */
-const COUNT = Symbol('count')
+export const PARENT_CONSTRAINT = Symbol('parent-constraint')
+export const PARENT = Symbol('parent')
+export const NEXT = Symbol('next')
+export const PREVIOUS = Symbol('previous')
 
-/** @public */
-export class NodeList<T extends Node> {
+export const FIRST = Symbol('first')
+export const LAST = Symbol('last')
+export const CHILDREN = Symbol('count')
+export const COUNT = Symbol('count')
+
+interface TNode {
+  /* child data */
+  [PARENT_CONSTRAINT]?: (newParent: TNode) => void
+  [PARENT]?: TNode
+  [NEXT]?: TNode
+  [PREVIOUS]?: TNode
+  /* parent data */
+  [FIRST]?: TNode
+  [LAST]?: TNode
+  [CHILDREN]?: NodeList<TNode>
+  [COUNT]?: number
+}
+
+export class NodeList<T extends TNode> {
   private parent: T
   public constructor (parent: T) {
     this.parent = parent
@@ -54,7 +61,7 @@ export class NodeList<T extends Node> {
     let node = this.parent[FIRST]
     while (node) {
       yield node as T
-      node = node[NEXT]
+      node = (node as T)[NEXT]
     }
   }
 
@@ -62,7 +69,7 @@ export class NodeList<T extends Node> {
     let node = this.parent[LAST]
     while (node) {
       yield node as T
-      node = node[PREVIOUS]
+      node = (node as T)[PREVIOUS]
     }
   }
 
@@ -81,187 +88,224 @@ export class NodeList<T extends Node> {
   }
 }
 
-/** @public */
-export class Node implements ChildNode, ParentNode {
-  /** @internal */
-  private [NEXT]?: Node
-  /** @internal */
-  private [PREVIOUS]?: Node
-  /** @internal */
-  private [PARENT]?: Node
-  /** @internal */
-  private [FIRST]?: Node
-  /** @internal */
-  private [LAST]?: Node
-  /** @internal */
-  private [LIST]?: NodeList<Node>
-  /** @internal */
-  private [COUNT]?: number
+const parent = <T extends TNode> (self: T): T | undefined => {
+  return self[PARENT] as T
+}
+
+const children = <T extends TNode> (self: T): NodeList<T> => {
+  const nodes = self[CHILDREN]
+  if (nodes) {
+    return nodes as NodeList<T>
+  } else {
+    const nodes = new NodeList<T>(self)
+    self[CHILDREN] = nodes
+    return nodes
+  }
+}
+
+const firstChild = <T extends TNode> (self: T): T | undefined => {
+  return self[FIRST] as T
+}
+
+const lastChild = <T extends TNode> (self: T): T | undefined => {
+  return self[LAST] as T
+}
+
+const remove = <T extends TNode> (self: T): void => {
+  const { [PARENT]: parent } = self
+  if (!parent) {
+    return
+  }
+  const { [PREVIOUS]: previous, [NEXT]: next } = self
+  if (previous) {
+    previous[NEXT] = next
+  } else {
+    parent[FIRST] = next
+  }
+  if (next) {
+    next[PREVIOUS] = previous
+  } else {
+    parent[LAST] = previous
+  }
+  self[PREVIOUS] = undefined
+  self[NEXT] = undefined
+  self[PARENT] = undefined
+  parent[COUNT] = parent[COUNT] as number - 1
+}
+
+const takeOver = <T extends TNode> (self: T, newNodes: T[]): void => {
+  const length = newNodes.length
+  let last: T | undefined
+  for (let i = 0; i < length; ++i) {
+    const node = newNodes[i]
+    remove(node)
+    node[PREVIOUS] = last
+    node[NEXT] = newNodes[i + 1]
+    if (node[PARENT_CONSTRAINT]) {
+      (node[PARENT_CONSTRAINT] as (newParent: TNode) => void)(self)
+    }
+    node[PARENT] = self
+    last = node
+  }
+}
+
+const before = <T extends TNode> (self: T, ...newNodes: T[]): void => {
+  const { [PARENT]: parent } = self
+  if (!parent) {
+    return
+  }
+  if (!newNodes.length) {
+    return
+  }
+  parent[COUNT] = parent[COUNT] as number + newNodes.length
+  takeOver(parent, newNodes)
+  const { [PREVIOUS]: previous } = self
+  const first = newNodes[0]
+  const last = newNodes[newNodes.length - 1]
+  last[NEXT] = self
+  self[PREVIOUS] = last
+  if (previous) {
+    previous[NEXT] = first
+    first[PREVIOUS] = previous
+  } else {
+    parent[FIRST] = first
+  }
+}
+
+const after = <T extends TNode> (self: T, ...newNodes: T[]): void => {
+  const { [PARENT]: parent } = self
+  if (!parent || !newNodes.length) {
+    return
+  }
+  parent[COUNT] = parent[COUNT] as number + newNodes.length
+  takeOver(parent, newNodes)
+  const { [NEXT]: next } = self
+  const first = newNodes[0]
+  const last = newNodes[newNodes.length - 1]
+  self[NEXT] = first
+  first[PREVIOUS] = self
+  if (next) {
+    last[NEXT] = next
+    next[PREVIOUS] = last
+  } else {
+    parent[LAST] = last
+  }
+}
+
+const replaceWith = <T extends TNode> (self: T, ...newNodes: T[]): void => {
+  const { [PARENT]: parent } = self
+  if (!parent) {
+    return
+  }
+  if (!newNodes.length) {
+    remove(self)
+    return
+  }
+  parent[COUNT] = parent[COUNT] as number + newNodes.length
+  takeOver(parent, newNodes)
+  const { [PREVIOUS]: previous, [NEXT]: next } = self
+  remove(self)
+  const first = newNodes[0]
+  const last = newNodes[newNodes.length - 1]
+  if (next) {
+    last[NEXT] = next
+    next[PREVIOUS] = last
+  } else {
+    parent[LAST] = last
+  }
+  if (previous) {
+    previous[NEXT] = first
+    first[PREVIOUS] = previous
+  } else {
+    parent[FIRST] = first
+  }
+}
+
+const append = <T extends TNode> (self: T, ...newNodes: T[]): void => {
+  const { [LAST]: last } = self
+  if (last) {
+    after(last, ...newNodes)
+  } else {
+    self[COUNT] = newNodes.length
+    takeOver(self, newNodes)
+    self[FIRST] = newNodes[0]
+    self[LAST] = newNodes[newNodes.length - 1]
+  }
+}
+
+const prepend = <T extends TNode> (self: T, ...newNodes: T[]): void => {
+  const { [FIRST]: first } = self
+  if (first) {
+    before(first, ...newNodes)
+  } else {
+    self[COUNT] = newNodes.length
+    takeOver(self, newNodes)
+    self[FIRST] = newNodes[0]
+    self[LAST] = newNodes[newNodes.length - 1]
+  }
+}
+
+export default Object.freeze({
+  parent,
+  children,
+  firstChild,
+  lastChild,
+  remove,
+  before,
+  after,
+  replaceWith,
+  append,
+  prepend
+})
+
+export class Node implements TNode, ChildNode, ParentNode {
+  /* child data */
+  public [NEXT]?: TNode
+  public [PREVIOUS]?: TNode
+  public [PARENT]?: TNode
+  /* parent data */
+  public [FIRST]?: TNode
+  public [LAST]?: TNode
+  public [CHILDREN]?: NodeList<TNode>
+  public [COUNT]?: number
 
   public get parent (): Node | undefined {
-    return this[PARENT]
-  }
-
-  protected setParent (parent: Node): void {
-    this[PARENT] = parent
+    return parent(this)
   }
 
   public get children (): NodeList<Node> {
-    const { [LIST]: list } = this
-    if (list) {
-      return list
-    } else {
-      const list = new NodeList(this)
-      this[LIST] = list
-      return list
-    }
+    return children(this)
   }
 
   public get firstChild (): Node | undefined {
-    return this[FIRST]
+    return firstChild(this)
   }
 
   public get lastChild (): Node | undefined {
-    return this[LAST]
-  }
-
-  /** @internal */
-  private static takeOver = (parent: Node, items: Node[]): void => {
-    for (const item of items) {
-      item.remove()
-      item.setParent(parent)
-    }
-  }
-
-  /** @internal */
-  private static link = (items: Node[]): void => {
-    if (items.length > 1) {
-      const end = items.length - 1
-      for (let i = 1; i < end; i++) {
-        const item = items[i]
-        item[PREVIOUS] = items[i - 1]
-        item[NEXT] = items[i + 1]
-      }
-      const first = items[0]
-      const last = items[items.length - 1]
-      first[NEXT] = items[1]
-      last[PREVIOUS] = items[items.length - 2]
-    }
+    return lastChild(this)
   }
 
   public remove (): void {
-    const { [PARENT]: parent } = this
-    if (!parent) {
-      return
-    }
-    const { [PREVIOUS]: previous, [NEXT]: next } = this
-    if (previous) {
-      previous[NEXT] = next
-    } else {
-      parent[FIRST] = next
-    }
-    if (next) {
-      next[PREVIOUS] = previous
-    } else {
-      parent[LAST] = previous
-    }
-    this[PREVIOUS] = undefined
-    this[NEXT] = undefined
-    this[PARENT] = undefined
-    parent[COUNT] = parent.children.length - 1
+    remove(this)
   }
 
-  public before (...items: Node[]): void {
-    const { [PARENT]: parent } = this
-    if (!parent || !items.length) {
-      return
-    }
-    Node.takeOver(parent, items)
-    parent[COUNT] = parent.children.length + items.length
-    const { [PREVIOUS]: previous } = this
-    items.push(this)
-    Node.link(items)
-    if (previous) {
-      const first = items[0]
-      previous[NEXT] = first
-      first[PREVIOUS] = previous
-    } else {
-      parent[FIRST] = items[0]
-    }
+  public before (...nodes: Node[]): void {
+    before(this, ...nodes)
   }
 
-  public after (...items: Node[]): void {
-    const { [PARENT]: parent } = this
-    if (!parent || !items.length) {
-      return
-    }
-    Node.takeOver(parent, items)
-    parent[COUNT] = parent.children.length + items.length
-    const { [NEXT]: next } = this
-    if (next) {
-      items.push(next)
-    } else {
-      parent[LAST] = items[items.length - 1]
-    }
-    Node.link(items)
-    const first = items[0]
-    this[NEXT] = first
-    first[PREVIOUS] = this
+  public after (...nodes: Node[]): void {
+    after(this, ...nodes)
   }
 
-  public replaceWith (...items: Node[]): void {
-    const { [PARENT]: parent } = this
-    if (!parent) {
-      return
-    }
-    if (!items.length) {
-      this.remove()
-      return
-    }
-    Node.takeOver(parent, items)
-    parent[COUNT] = parent.children.length - 1 + items.length
-    const { [PREVIOUS]: previous, [NEXT]: next } = this
-    this[PREVIOUS] = undefined
-    this[NEXT] = undefined
-    this[PARENT] = undefined
-    if (next) {
-      items.push(next)
-    } else {
-      parent[LAST] = items[items.length - 1]
-    }
-    Node.link(items)
-    if (previous) {
-      const first = items[0]
-      previous[NEXT] = first
-      first[PREVIOUS] = previous
-    } else {
-      parent[FIRST] = items[0]
-    }
+  public replaceWith (...nodes: Node[]): void {
+    replaceWith(this, ...nodes)
   }
 
-  public append (...items: Node[]): void {
-    const { [LAST]: last } = this
-    if (last) {
-      last.after(...items)
-    } else {
-      Node.takeOver(this, items)
-      this[COUNT] = items.length
-      Node.link(items)
-      this[FIRST] = items[0]
-      this[LAST] = items[items.length - 1]
-    }
+  public append (...nodes: Node[]): void {
+    append(this, ...nodes)
   }
 
-  public prepend (...items: Node[]): void {
-    const { [FIRST]: first } = this
-    if (first) {
-      first.before(...items)
-    } else {
-      Node.takeOver(this, items)
-      this[COUNT] = items.length
-      Node.link(items)
-      this[FIRST] = items[0]
-      this[LAST] = items[items.length - 1]
-    }
+  public prepend (...nodes: Node[]): void {
+    prepend(this, ...nodes)
   }
 }
