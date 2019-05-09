@@ -68,9 +68,7 @@ export class Node implements ChildNode, ParentNode {
 
   private static takeOver (nodes: Node[]): void {
     for (const node of nodes) {
-      if (node.parent) {
-        node.remove()
-      }
+      node.remove()
     }
   }
 

@@ -106,9 +106,7 @@ const remove = <T extends TreeNode>(self: T): void => {
 
 const takeOver = <T extends TreeNode>(nodes: T[]): void => {
   for (const node of nodes) {
-    if (parent(node)) {
-      remove(node)
-    }
+    remove(node)
   }
 }
 
