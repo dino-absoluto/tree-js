@@ -21,6 +21,10 @@ import {
   ChildNode,
   ParentNode,
   Children,
+  TreeFunctions
+} from './common'
+
+import {
   PARENT_CONSTRAINT,
   PARENT,
   NEXT,
@@ -28,9 +32,9 @@ import {
   FIRST,
   LAST,
   CHILDREN,
-  COUNT,
-  TreeFunctions
-} from './common'
+  COUNT
+} from './symbols'
+
 /* code */
 
 /**

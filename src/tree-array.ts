@@ -20,11 +20,14 @@
 import {
   ChildNode,
   ParentNode,
-  PARENT_CONSTRAINT,
-  PARENT,
-  CHILDREN,
   TreeFunctions
 } from './common'
+
+import {
+  PARENT_CONSTRAINT,
+  PARENT,
+  CHILDREN
+} from './symbols'
 
 /* code */
 
