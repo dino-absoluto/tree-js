@@ -20,20 +20,22 @@
 import { ChildNode, ParentNode } from './common'
 /* code */
 
-const NEXT = Symbol('next')
-const PREVIOUS = Symbol('previous')
-const PARENT = Symbol('parent')
+export const PARENT_CONSTRAINT = Symbol('parent-constraint')
+export const PARENT = Symbol('parent')
+export const NEXT = Symbol('next')
+export const PREVIOUS = Symbol('previous')
 
-const FIRST = Symbol('first')
-const LAST = Symbol('last')
-const CHILDREN = Symbol('count')
-const COUNT = Symbol('count')
+export const FIRST = Symbol('first')
+export const LAST = Symbol('last')
+export const CHILDREN = Symbol('count')
+export const COUNT = Symbol('count')
 
 interface TNode {
   /* child data */
+  [PARENT_CONSTRAINT]?: (newParent: TNode) => void
+  [PARENT]?: TNode
   [NEXT]?: TNode
   [PREVIOUS]?: TNode
-  [PARENT]?: TNode
   /* parent data */
   [FIRST]?: TNode
   [LAST]?: TNode
@@ -145,6 +147,9 @@ const takeOver = <T extends TNode> (self: T, newNodes: T[]): void => {
     remove(node)
     node[PREVIOUS] = last
     node[NEXT] = newNodes[i + 1]
+    if (node[PARENT_CONSTRAINT]) {
+      (node[PARENT_CONSTRAINT] as (newParent: TNode) => void)(self)
+    }
     node[PARENT] = self
     last = node
   }
