@@ -120,6 +120,14 @@ const lastChild = <T extends TNode> (self: T): T | undefined => {
   return self[LAST] as T
 }
 
+const nextSibling = <T extends TNode> (self: T): T | undefined => {
+  return self[NEXT] as T
+}
+
+const previousSibling = <T extends TNode> (self: T): T | undefined => {
+  return self[PREVIOUS] as T
+}
+
 const remove = <T extends TNode> (self: T): void => {
   const { [PARENT]: parent } = self
   if (!parent) {
@@ -262,6 +270,8 @@ const fns: TreeFunctions = Object.freeze({
   children,
   firstChild,
   lastChild,
+  nextSibling,
+  previousSibling,
   remove,
   before,
   after,
@@ -306,6 +316,14 @@ export class Node implements ChildNode, ParentNode {
 
   public get lastChild (): Node | undefined {
     return lastChild(this)
+  }
+
+  public get nextSibling (): Node | undefined {
+    return nextSibling(this)
+  }
+
+  public get previousSibling (): Node | undefined {
+    return previousSibling(this)
   }
 
   public remove (): void {

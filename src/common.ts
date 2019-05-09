@@ -92,6 +92,8 @@ export interface TreeFunctions {
   children <T extends object> (self: T): Children<T>
   firstChild <T extends object> (self: T): T | undefined
   lastChild <T extends object> (self: T): T | undefined
+  nextSibling <T extends object> (self: T): T | undefined
+  previousSibling <T extends object> (self: T): T | undefined
   remove <T extends object> (self: T): void
   before <T extends object> (self: T, ...newNodes: T[]): void
   after <T extends object> (self: T, ...newNodes: T[]): void

@@ -79,6 +79,26 @@ const lastChild = <T extends TNode>(self: T): T | undefined => {
   return nodes[nodes.length - 1] as T
 }
 
+const nextSibling = <T extends TNode>(self: T): T | undefined => {
+  const ptr = self[PARENT]
+  if (!ptr) {
+    return
+  }
+  const p = ptr.parent as T
+  const id = ptr.index
+  return children(p)[id + 1]
+}
+
+const previousSibling = <T extends TNode>(self: T): T | undefined => {
+  const ptr = self[PARENT]
+  if (!ptr) {
+    return
+  }
+  const p = ptr.parent as T
+  const id = ptr.index
+  return children(p)[id - 1]
+}
+
 const updateIndex = (
   self: TNode,
   start: number = 0,
@@ -106,8 +126,8 @@ const remove = <T extends TNode>(self: T): void => {
     return
   }
   const p = ptr.parent
-  const id = ptr.index
   self[PARENT] = undefined
+  const id = ptr.index
   children(p).splice(id, 1)
   updateIndex(p, id)
 }
@@ -124,8 +144,8 @@ const before = <T extends TNode>(self: T, ...newNodes: T[]): void => {
     return
   }
   const p = ptr.parent
-  const id = ptr.index
   takeOver(newNodes)
+  const id = (self[PARENT] as ParentPointer).index
   children(p).splice(id, 0, ...newNodes)
   updateIndex(p, id)
 }
@@ -136,8 +156,8 @@ const after = <T extends TNode>(self: T, ...newNodes: T[]): void => {
     return
   }
   const p = ptr.parent
-  const id = ptr.index
   takeOver(newNodes)
+  const id = (self[PARENT] as ParentPointer).index
   children(p).splice(id + 1, 0, ...newNodes)
   updateIndex(p, id + 1)
 }
@@ -148,8 +168,8 @@ const replaceWith = <T extends TNode>(self: T, ...newNodes: T[]): void => {
     return
   }
   const p = ptr.parent
-  const id = ptr.index
   takeOver(newNodes)
+  const id = (self[PARENT] as ParentPointer).index
   children(p).splice(id, 1, ...newNodes)
   self[PARENT] = undefined
   if (newNodes.length === 1) {
@@ -181,6 +201,8 @@ const fns: TreeFunctions = Object.freeze({
   children,
   firstChild,
   lastChild,
+  nextSibling,
+  previousSibling,
   remove,
   before,
   after,
@@ -217,6 +239,14 @@ export class Node implements ChildNode, ParentNode {
 
   public get lastChild (): Node | undefined {
     return lastChild(this)
+  }
+
+  public get nextSibling (): Node | undefined {
+    return nextSibling(this)
+  }
+
+  public get previousSibling (): Node | undefined {
+    return previousSibling(this)
   }
 
   public remove (): void {
