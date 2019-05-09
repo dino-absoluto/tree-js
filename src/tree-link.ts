@@ -17,20 +17,24 @@
  *
  */
 /* imports */
-import { ChildNode, ParentNode } from './common'
+import {
+  ChildNode,
+  ParentNode,
+  PARENT_CONSTRAINT,
+  PARENT,
+  NEXT,
+  PREVIOUS,
+  FIRST,
+  LAST,
+  CHILDREN,
+  COUNT
+} from './common'
 /* code */
 
-export const PARENT_CONSTRAINT = Symbol('parent-constraint')
-export const PARENT = Symbol('parent')
-export const NEXT = Symbol('next')
-export const PREVIOUS = Symbol('previous')
-
-export const FIRST = Symbol('first')
-export const LAST = Symbol('last')
-export const CHILDREN = Symbol('count')
-export const COUNT = Symbol('count')
-
-interface TNode {
+/**
+ * @public
+ */
+export interface TNode {
   /* child data */
   [PARENT_CONSTRAINT]?: (newParent: TNode) => void
   [PARENT]?: TNode
@@ -43,6 +47,9 @@ interface TNode {
   [COUNT]?: number
 }
 
+/**
+ * @public
+ */
 export class NodeList<T extends TNode> {
   private parent: T
   public constructor (parent: T) {
@@ -245,7 +252,10 @@ const prepend = <T extends TNode> (self: T, ...newNodes: T[]): void => {
   }
 }
 
-export default Object.freeze({
+/**
+ * @public
+ */
+const fns = Object.freeze({
   parent,
   children,
   firstChild,
@@ -257,7 +267,11 @@ export default Object.freeze({
   append,
   prepend
 })
+export default fns
 
+/**
+ * @public
+ */
 export class Node implements TNode, ChildNode, ParentNode {
   /* child data */
   public [NEXT]?: TNode

@@ -17,19 +17,28 @@
  *
  */
 /* imports */
-import { ChildNode, ParentNode } from './common'
+import {
+  ChildNode,
+  ParentNode,
+  PARENT_CONSTRAINT,
+  PARENT,
+  CHILDREN
+} from './common'
 
 /* code */
-export const PARENT = Symbol('parent')
-export const PARENT_CONSTRAINT = Symbol('parent-constraint')
-export const CHILDREN = Symbol('children')
 
-interface ParentPointer {
+/**
+ * @public
+ */
+export interface ParentPointer {
   parent: TNode
   index: number
 }
 
-interface TNode {
+/**
+ * @public
+ */
+export interface TNode {
   [PARENT_CONSTRAINT]?: (newParent: TNode) => void
   [PARENT]?: ParentPointer
   [CHILDREN]?: TNode[]
@@ -163,9 +172,11 @@ const prepend = <T extends TNode>(self: T, ...newNodes: T[]): void => {
   updateIndex(self)
 }
 
-export default Object.freeze({
+/**
+ * @public
+ */
+const fns = Object.freeze({
   parent,
-  index,
   children,
   firstChild,
   lastChild,
@@ -176,7 +187,11 @@ export default Object.freeze({
   append,
   prepend
 })
+export default fns
 
+/**
+ * @public
+ */
 export class Node implements TNode, ChildNode, ParentNode {
   public [PARENT]?: ParentPointer
   public [CHILDREN]?: TNode[]

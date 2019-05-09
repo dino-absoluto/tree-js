@@ -39,3 +39,36 @@ export interface ParentNode {
   append (...items: ChildNode[]): void
   prepend (...items: ChildNode[]): void
 }
+
+/**
+ * @public
+ */
+export const PARENT_CONSTRAINT = Symbol('parent-constraint')
+/**
+ * @public
+ */
+export const PARENT = Symbol('parent')
+/**
+ * @public
+ */
+export const NEXT = Symbol('next')
+/**
+ * @public
+ */
+export const PREVIOUS = Symbol('previous')
+/**
+ * @public
+ */
+export const FIRST = Symbol('first')
+/**
+ * @public
+ */
+export const LAST = Symbol('last')
+/**
+ * @public
+ */
+export const CHILDREN = Symbol('count')
+/**
+ * @public
+ */
+export const COUNT = Symbol('count')

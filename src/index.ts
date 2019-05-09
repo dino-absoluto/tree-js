@@ -17,7 +17,33 @@
  *
  */
 /* imports */
+import
+Link, {
+  Node as LinkNode,
+  TNode as LinkTNode,
+  NodeList as LinkNodeList
+} from './tree-link'
+
+import
+Linear, {
+  Node as LinearNode,
+  TNode as LinearTNode,
+  ParentPointer as LinearParentPointer
+} from './tree-array'
+
 /* reexports */
-export * from './tree-link'
+export * from './common'
+export {
+  Link,
+  LinkNode,
+  LinkTNode,
+  LinkNodeList
+}
+export {
+  Linear,
+  LinearNode,
+  LinearTNode,
+  LinearParentPointer
+}
 
 /* code */

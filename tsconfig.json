@@ -18,5 +18,9 @@
     "declaration": true,
     "declarationDir": "./__tmp__/built/dts",
     "tsBuildInfoFile": "./__tmp__/built/cache/tsbuildinfo"
-  }
+  },
+  "exclude": [
+    "__tmp__",
+    "**/*.spec.ts"
+  ]
 }
