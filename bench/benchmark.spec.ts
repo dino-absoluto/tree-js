@@ -21,20 +21,11 @@ import * as Benchmark from 'benchmark'
 import * as c from 'kleur'
 import {
   TreeLink,
-  TreeArray,
-  TreeArrayStatic
+  TreeArray
 } from '../src'
 import round = require('lodash/round')
 
 class TreeArrayNode extends TreeArray.Node {
-  public id: number
-  public constructor (id: number) {
-    super()
-    this.id = id
-  }
-}
-
-class TreeArrayStaticNode extends TreeArrayStatic.Node {
   public id: number
   public constructor (id: number) {
     super()
@@ -65,7 +56,7 @@ const formatBench = (target: BenchResult): string => {
 }
 
 // eslint-disable-next-line
-/*
+//*
 Object.assign(Benchmark.options, {
   maxTime: 1,
   minSamples: 1
@@ -139,9 +130,6 @@ test('append / prepend', () => {
     ['Array', makeTest(
       (id: number) => new CustomArray<unknown>(id)
     )],
-    ['TreeArrayStatic', makeTest(
-      (id: number) => new TreeArrayStaticNode(id)
-    )],
     ['TreeArray', makeTest(
       (id: number) => new TreeArrayNode(id)
     )],
@@ -186,9 +174,6 @@ test('loop', () => {
   const tests: [string, () => void][] = [
     ['Array', makeTest(
       (id: number) => new CustomArray<unknown>(id)
-    )],
-    ['TreeArrayStatic', makeTest(
-      (id: number) => new TreeArrayStaticNode(id)
     )],
     ['TreeArray', makeTest(
       (id: number) => new TreeArrayNode(id)
@@ -253,10 +238,6 @@ test('synthetic', () => {
     }
   }
   const tests: [string, () => void][] = [
-    ['TreeArrayStatic', makeTest(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (id: number) => new TreeArrayStaticNode(id) as any
-    )],
     ['TreeArray', makeTest(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (id: number) => new TreeArrayNode(id) as any

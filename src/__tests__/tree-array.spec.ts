@@ -17,7 +17,7 @@
  *
  */
 /* imports */
-import { Node, PARENT_CONSTRAINT } from '../tree-array-static'
+import { Node, PARENT_CONSTRAINT } from '../tree-array'
 
 class TNode extends Node {
   public [PARENT_CONSTRAINT] (newParent: Node): void {

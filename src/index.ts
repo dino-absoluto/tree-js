@@ -19,12 +19,10 @@
 /* imports */
 import * as TreeLink from './tree-link'
 import * as TreeArray from './tree-array'
-import * as TreeArrayStatic from './tree-array-static'
 
 /* reexports */
 export { ChildNode, ParentNode } from './common'
 export { TreeLink }
 export { TreeArray }
-export { TreeArrayStatic }
 
 /* code */

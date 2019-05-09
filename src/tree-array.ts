@@ -20,131 +20,208 @@
 import { ChildNode, ParentNode } from './common'
 
 /* code */
-const PARENT = Symbol('parent')
-const CHILDREN = Symbol('children')
+export const PARENT = Symbol('parent')
+export const PARENT_CONSTRAINT = Symbol('parent-constraint')
+export const CHILDREN = Symbol('children')
 
 interface ParentPointer {
-  parent: Node
+  parent: TreeNode
   index: number
 }
 
-/**
- * A child node.
- */
-export class Node implements ChildNode, ParentNode {
-  private [PARENT]?: ParentPointer
-  private [CHILDREN]: Node[] = []
+interface TreeNode {
+  [PARENT_CONSTRAINT]?: (newParent: TreeNode) => void
+  [PARENT]?: ParentPointer
+  [CHILDREN]?: TreeNode[]
+}
 
-  private setPointer (ptr?: ParentPointer): void {
-    this[PARENT] = ptr
+const parent = <T extends TreeNode>(self: T): T | undefined => {
+  const ptr = self[PARENT]
+  if (ptr) {
+    return ptr.parent as T
   }
+}
 
-  public get parent (): Node | undefined {
-    const ptr = this[PARENT]
-    if (ptr) {
-      return ptr.parent
+const index = <T extends TreeNode>(self: T): number | undefined => {
+  const ptr = self[PARENT]
+  if (ptr) {
+    return ptr.index
+  }
+}
+
+const children = <T extends TreeNode>(self: T): T[] => {
+  const children = self[CHILDREN]
+  if (children) {
+    return children as T[]
+  } else {
+    const children: T[] = []
+    self[CHILDREN] = children
+    return children
+  }
+}
+
+const firstChild = <T extends TreeNode>(self: T): T | undefined => {
+  return children(self)[0] as T
+}
+
+const lastChild = <T extends TreeNode>(self: T): T | undefined => {
+  const nodes = children(self)
+  return nodes[nodes.length - 1] as T
+}
+
+const updateIndex = (
+  self: TreeNode,
+  start: number = 0,
+  end: number | undefined = undefined
+): void => {
+  const nodes = children(self)
+  if (end == null) {
+    end = nodes.length
+  }
+  for (let i = start; i < end; ++i) {
+    const node = nodes[i]
+    if (node[PARENT_CONSTRAINT]) {
+      (node[PARENT_CONSTRAINT] as (newParent: TreeNode) => void)(self)
+    }
+    node[PARENT] = {
+      parent: self,
+      index: i
     }
   }
+}
 
-  public get children (): readonly Node[] {
-    return this[CHILDREN]
+const remove = <T extends TreeNode>(self: T): void => {
+  const ptr = self[PARENT]
+  if (!ptr) {
+    return
   }
+  const p = ptr.parent
+  const id = ptr.index
+  self[PARENT] = undefined
+  children(p).splice(id, 1)
+  updateIndex(p, id)
+}
 
-  public get firstChild (): Node | undefined {
-    return this[CHILDREN][0]
+const takeOver = <T extends TreeNode>(nodes: T[]): void => {
+  for (const node of nodes) {
+    remove(node)
   }
+}
 
-  public get lastChild (): Node | undefined {
-    const { children } = this
-    return children[children.length - 1]
+const before = <T extends TreeNode>(self: T, ...newNodes: T[]): void => {
+  const ptr = self[PARENT]
+  if (!ptr) {
+    return
+  }
+  const p = ptr.parent
+  const id = ptr.index
+  takeOver(newNodes)
+  children(p).splice(id, 0, ...newNodes)
+  updateIndex(p, id)
+}
+
+const after = <T extends TreeNode>(self: T, ...newNodes: T[]): void => {
+  const ptr = self[PARENT]
+  if (!ptr) {
+    return
+  }
+  const p = ptr.parent
+  const id = ptr.index
+  takeOver(newNodes)
+  children(p).splice(id + 1, 0, ...newNodes)
+  updateIndex(p, id + 1)
+}
+
+const replaceWith = <T extends TreeNode>(self: T, ...newNodes: T[]): void => {
+  const ptr = self[PARENT]
+  if (!ptr) {
+    return
+  }
+  const p = ptr.parent
+  const id = ptr.index
+  takeOver(newNodes)
+  children(p).splice(id, 1, ...newNodes)
+  self[PARENT] = undefined
+  if (newNodes.length === 1) {
+    updateIndex(p, id, id + 1)
+  } else {
+    updateIndex(p, id)
+  }
+}
+
+const append = <T extends TreeNode>(self: T, ...newNodes: T[]): void => {
+  const nodes = children(self)
+  const start = nodes.length
+  takeOver(newNodes)
+  self[CHILDREN] = nodes.concat(newNodes)
+  updateIndex(self, start)
+}
+
+const prepend = <T extends TreeNode>(self: T, ...newNodes: T[]): void => {
+  takeOver(newNodes)
+  self[CHILDREN] = newNodes.concat(children(self))
+  updateIndex(self)
+}
+
+export default Object.freeze({
+  parent,
+  index,
+  children,
+  firstChild,
+  lastChild,
+  remove,
+  before,
+  after,
+  replaceWith,
+  append,
+  prepend
+})
+
+export class Node implements TreeNode, ChildNode, ParentNode {
+  public [PARENT]?: ParentPointer
+  public [CHILDREN]?: TreeNode[]
+
+  public get parent (): Node | undefined {
+    return parent(this)
   }
 
   public get index (): number | undefined {
-    const ptr = this[PARENT]
-    if (ptr) {
-      return ptr.index
-    }
+    return index(this)
   }
 
-  private static takeOver (nodes: Node[]): void {
-    for (const node of nodes) {
-      node.remove()
-    }
+  public get children (): Node[] {
+    return children(this)
   }
 
-  private updateIndex (
-    start: number = 0,
-    end: number = this[CHILDREN].length
-  ): void {
-    const { children } = this
-    for (let i = start; i < end; ++i) {
-      children[i].setPointer({
-        parent: this,
-        index: i
-      })
-    }
+  public get firstChild (): Node | undefined {
+    return firstChild(this)
+  }
+
+  public get lastChild (): Node | undefined {
+    return lastChild(this)
   }
 
   public remove (): void {
-    const { parent } = this
-    if (!parent) {
-      return
-    }
-    const index = this.index as number
-    this.setPointer()
-    parent[CHILDREN].splice(index, 1)
-    parent.updateIndex(index)
+    remove(this)
   }
 
   public before (...nodes: Node[]): void {
-    const { parent } = this
-    if (!parent) {
-      return
-    }
-    const index = this.index as number
-    Node.takeOver(nodes)
-    parent[CHILDREN].splice(index, 0, ...nodes)
-    parent.updateIndex(index)
+    before(this, ...nodes)
   }
 
   public after (...nodes: Node[]): void {
-    const { parent } = this
-    if (!parent) {
-      return
-    }
-    const index = this.index as number
-    Node.takeOver(nodes)
-    parent[CHILDREN].splice(index + 1, 0, ...nodes)
-    parent.updateIndex(index + 1)
+    after(this, ...nodes)
   }
 
   public replaceWith (...nodes: Node[]): void {
-    const { parent } = this
-    if (!parent) {
-      return
-    }
-    const index = this.index as number
-    Node.takeOver(nodes)
-    parent[CHILDREN].splice(index, 1, ...nodes)
-    this.setPointer()
-    if (nodes.length === 1) {
-      parent.updateIndex(index, index + 1)
-    } else {
-      parent.updateIndex(index)
-    }
+    replaceWith(this, ...nodes)
   }
 
   public append (...nodes: Node[]): void {
-    const { children } = this
-    const start = children.length
-    Node.takeOver(nodes)
-    this[CHILDREN] = children.concat(nodes)
-    this.updateIndex(start)
+    append(this, ...nodes)
   }
 
   public prepend (...nodes: Node[]): void {
-    Node.takeOver(nodes)
-    this[CHILDREN] = nodes.concat(this[CHILDREN])
-    this.updateIndex()
+    prepend(this, ...nodes)
   }
 }
