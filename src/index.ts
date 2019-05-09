@@ -17,15 +17,13 @@
  *
  */
 /* imports */
-import
-Link, {
+import Link, {
   Node as LinkNode,
   TNode as _LinkTNode,
   NodeList as _LinkNodeList
 } from './tree-link'
 
-import
-Linear, {
+import Linear, {
   Node as LinearNode,
   TNode as _LinearTNode,
   ParentPointer as _LinearParentPointer

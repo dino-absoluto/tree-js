@@ -14,7 +14,7 @@
     "bench": "env BENCHMARK=1 jest",
     "prepublishOnly": "npm run build -- --env.prod && npm run build:api",
     "build": "webpack",
-    "build:api": "tsc -d --emitDeclarationOnly && api-extractor run --local --verbose"
+    "build:api": "tsc -p tsconfig.build.json -d --emitDeclarationOnly && api-extractor run --local --verbose"
   },
   "repository": {
     "type": "git",
