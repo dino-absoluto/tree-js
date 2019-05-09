@@ -25,31 +25,31 @@ export const PARENT_CONSTRAINT = Symbol('parent-constraint')
 export const CHILDREN = Symbol('children')
 
 interface ParentPointer {
-  parent: TreeNode
+  parent: TNode
   index: number
 }
 
-interface TreeNode {
-  [PARENT_CONSTRAINT]?: (newParent: TreeNode) => void
+interface TNode {
+  [PARENT_CONSTRAINT]?: (newParent: TNode) => void
   [PARENT]?: ParentPointer
-  [CHILDREN]?: TreeNode[]
+  [CHILDREN]?: TNode[]
 }
 
-const parent = <T extends TreeNode>(self: T): T | undefined => {
+const parent = <T extends TNode>(self: T): T | undefined => {
   const ptr = self[PARENT]
   if (ptr) {
     return ptr.parent as T
   }
 }
 
-const index = <T extends TreeNode>(self: T): number | undefined => {
+const index = <T extends TNode>(self: T): number | undefined => {
   const ptr = self[PARENT]
   if (ptr) {
     return ptr.index
   }
 }
 
-const children = <T extends TreeNode>(self: T): T[] => {
+const children = <T extends TNode>(self: T): T[] => {
   const children = self[CHILDREN]
   if (children) {
     return children as T[]
@@ -60,17 +60,17 @@ const children = <T extends TreeNode>(self: T): T[] => {
   }
 }
 
-const firstChild = <T extends TreeNode>(self: T): T | undefined => {
+const firstChild = <T extends TNode>(self: T): T | undefined => {
   return children(self)[0] as T
 }
 
-const lastChild = <T extends TreeNode>(self: T): T | undefined => {
+const lastChild = <T extends TNode>(self: T): T | undefined => {
   const nodes = children(self)
   return nodes[nodes.length - 1] as T
 }
 
 const updateIndex = (
-  self: TreeNode,
+  self: TNode,
   start: number = 0,
   end: number | undefined = undefined
 ): void => {
@@ -81,7 +81,7 @@ const updateIndex = (
   for (let i = start; i < end; ++i) {
     const node = nodes[i]
     if (node[PARENT_CONSTRAINT]) {
-      (node[PARENT_CONSTRAINT] as (newParent: TreeNode) => void)(self)
+      (node[PARENT_CONSTRAINT] as (newParent: TNode) => void)(self)
     }
     node[PARENT] = {
       parent: self,
@@ -90,7 +90,7 @@ const updateIndex = (
   }
 }
 
-const remove = <T extends TreeNode>(self: T): void => {
+const remove = <T extends TNode>(self: T): void => {
   const ptr = self[PARENT]
   if (!ptr) {
     return
@@ -102,13 +102,13 @@ const remove = <T extends TreeNode>(self: T): void => {
   updateIndex(p, id)
 }
 
-const takeOver = <T extends TreeNode>(nodes: T[]): void => {
+const takeOver = <T extends TNode>(nodes: T[]): void => {
   for (const node of nodes) {
     remove(node)
   }
 }
 
-const before = <T extends TreeNode>(self: T, ...newNodes: T[]): void => {
+const before = <T extends TNode>(self: T, ...newNodes: T[]): void => {
   const ptr = self[PARENT]
   if (!ptr) {
     return
@@ -120,7 +120,7 @@ const before = <T extends TreeNode>(self: T, ...newNodes: T[]): void => {
   updateIndex(p, id)
 }
 
-const after = <T extends TreeNode>(self: T, ...newNodes: T[]): void => {
+const after = <T extends TNode>(self: T, ...newNodes: T[]): void => {
   const ptr = self[PARENT]
   if (!ptr) {
     return
@@ -132,7 +132,7 @@ const after = <T extends TreeNode>(self: T, ...newNodes: T[]): void => {
   updateIndex(p, id + 1)
 }
 
-const replaceWith = <T extends TreeNode>(self: T, ...newNodes: T[]): void => {
+const replaceWith = <T extends TNode>(self: T, ...newNodes: T[]): void => {
   const ptr = self[PARENT]
   if (!ptr) {
     return
@@ -149,7 +149,7 @@ const replaceWith = <T extends TreeNode>(self: T, ...newNodes: T[]): void => {
   }
 }
 
-const append = <T extends TreeNode>(self: T, ...newNodes: T[]): void => {
+const append = <T extends TNode>(self: T, ...newNodes: T[]): void => {
   const nodes = children(self)
   const start = nodes.length
   takeOver(newNodes)
@@ -157,7 +157,7 @@ const append = <T extends TreeNode>(self: T, ...newNodes: T[]): void => {
   updateIndex(self, start)
 }
 
-const prepend = <T extends TreeNode>(self: T, ...newNodes: T[]): void => {
+const prepend = <T extends TNode>(self: T, ...newNodes: T[]): void => {
   takeOver(newNodes)
   self[CHILDREN] = newNodes.concat(children(self))
   updateIndex(self)
@@ -177,9 +177,9 @@ export default Object.freeze({
   prepend
 })
 
-export class Node implements TreeNode, ChildNode, ParentNode {
+export class Node implements TNode, ChildNode, ParentNode {
   public [PARENT]?: ParentPointer
-  public [CHILDREN]?: TreeNode[]
+  public [CHILDREN]?: TNode[]
 
   public get parent (): Node | undefined {
     return parent(this)
