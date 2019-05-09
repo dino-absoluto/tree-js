@@ -17,7 +17,8 @@
  *
  */
 /* imports */
-import { Node, PARENT_CONSTRAINT } from '../tree-link'
+import { PARENT_CONSTRAINT } from '../common'
+import { Node, NodeList } from '../tree-link'
 
 class TNode extends Node {
   public id: string
@@ -51,19 +52,20 @@ describe('TreeArrayStatic', () => {
     const n3 = new TNode('3')
     const n4 = new TNode('4')
     p.append(n1, n2, n3, n4)
-    expect([...p.children]).toMatchObject([
+    const pchildren = p.children as NodeList<Node>
+    expect([...pchildren]).toMatchObject([
       n1, n2, n3, n4
     ])
-    expect([...p.children.valuesRight()]).toMatchObject([
+    expect([...pchildren.valuesRight()]).toMatchObject([
       n4, n3, n2, n1
     ])
-    expect([...p.children.entries()]).toMatchObject([
+    expect([...pchildren.entries()]).toMatchObject([
       [0, n1],
       [1, n2],
       [2, n3],
       [3, n4]
     ])
-    expect([...p.children.entriesRight()]).toMatchObject([
+    expect([...pchildren.entriesRight()]).toMatchObject([
       [3, n4],
       [2, n3],
       [1, n2],
