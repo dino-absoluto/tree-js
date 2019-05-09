@@ -58,38 +58,32 @@ export class NodeList<T extends TNode> {
   }
 
   public * values (): IterableIterator<T> {
-    const count = this.length
     let node = this.parent[FIRST]
-    for (let i = 0; i < count; ++i) {
+    while (node) {
       yield node as T
       node = (node as T)[NEXT]
     }
   }
 
   public * valuesRight (): IterableIterator<T> {
-    const count = this.length
     let node = this.parent[LAST]
-    for (let i = count - 1; i >= 0; --i) {
+    while (node) {
       yield node as T
       node = (node as T)[PREVIOUS]
     }
   }
 
   public * entries (): IterableIterator<[number, T]> {
-    const count = this.length
-    let node = this.parent[FIRST]
-    for (let i = 0; i < count; ++i) {
-      yield [i, node as T]
-      node = (node as T)[NEXT]
+    let i = 0
+    for (const node of this.values()) {
+      yield [i++, node]
     }
   }
 
   public * entriesRight (): IterableIterator<[number, T]> {
-    const count = this.length
-    let node = this.parent[LAST]
-    for (let i = count - 1; i >= 0; --i) {
-      yield [i, node as T]
-      node = (node as T)[PREVIOUS]
+    let i = 0
+    for (const node of this.valuesRight()) {
+      yield [this.length + --i, node]
     }
   }
 }

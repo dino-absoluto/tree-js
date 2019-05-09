@@ -74,9 +74,9 @@ export class NodeList<T extends Node> {
   }
 
   public * entriesRight (): IterableIterator<[number, T]> {
-    let i = this.length - 1
+    let i = 0
     for (const node of this.valuesRight()) {
-      yield [i--, node]
+      yield [this.length + --i, node]
     }
   }
 }
