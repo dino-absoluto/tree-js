@@ -19,6 +19,7 @@
 /* imports */
 import {
   TreeLink,
+  TreeLinkStatic,
   TreeArray
 } from '..'
 
