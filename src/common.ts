@@ -24,6 +24,8 @@
  */
 export interface ChildNode {
   parent?: ParentNode
+  next?: ChildNode
+  previous?: ChildNode
   remove (): void
   before (...items: ChildNode[]): void
   after (...items: ChildNode[]): void
@@ -45,8 +47,8 @@ export interface Children<T extends object> {
  */
 export interface ParentNode {
   children: Children<ChildNode>
-  firstChild?: ChildNode
-  lastChild?: ChildNode
+  first?: ChildNode
+  last?: ChildNode
   append (...items: ChildNode[]): void
   prepend (...items: ChildNode[]): void
 }
@@ -90,10 +92,10 @@ export const COUNT = Symbol('count')
 export interface TreeFunctions {
   parent <T extends object> (self: T): T | undefined
   children <T extends object> (self: T): Children<T>
-  firstChild <T extends object> (self: T): T | undefined
-  lastChild <T extends object> (self: T): T | undefined
-  nextSibling <T extends object> (self: T): T | undefined
-  previousSibling <T extends object> (self: T): T | undefined
+  first <T extends object> (self: T): T | undefined
+  last <T extends object> (self: T): T | undefined
+  next <T extends object> (self: T): T | undefined
+  previous <T extends object> (self: T): T | undefined
   remove <T extends object> (self: T): void
   before <T extends object> (self: T, ...newNodes: T[]): void
   after <T extends object> (self: T, ...newNodes: T[]): void

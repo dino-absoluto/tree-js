@@ -127,21 +127,21 @@ describe.each([
     expect(n2.parent).toBe(p)
     expect(n3.parent).toBe(p)
     expect(n4.parent).toBe(p)
-    expect(n2.previousSibling).toBe(undefined)
-    expect(n2.nextSibling).toBe(n1)
-    expect(n1.previousSibling).toBe(n2)
-    expect(n1.nextSibling).toBe(n4)
-    expect(n4.previousSibling).toBe(n1)
-    expect(n4.nextSibling).toBe(n3)
-    expect(n3.previousSibling).toBe(n4)
-    expect(n3.nextSibling).toBe(undefined)
+    expect(n2.previous).toBe(undefined)
+    expect(n2.next).toBe(n1)
+    expect(n1.previous).toBe(n2)
+    expect(n1.next).toBe(n4)
+    expect(n4.previous).toBe(n1)
+    expect(n4.next).toBe(n3)
+    expect(n3.previous).toBe(n4)
+    expect(n3.next).toBe(undefined)
     n2.before()
     n2.after()
     expect([...p.children]).toMatchObject([
       n2, n1, n4, n3
     ])
-    expect(p.firstChild).toBe(n2)
-    expect(p.lastChild).toBe(n3)
+    expect(p.first).toBe(n2)
+    expect(p.last).toBe(n3)
   })
   test('sub tree', () => {
     const n1 = new TNode('1')
@@ -151,6 +151,22 @@ describe.each([
     n1.append(n2)
     n2.append(n3)
     n2.append(n4)
+    /* n1 */
+    expect(n1.parent).toBe(undefined)
+    expect(n1.next).toBe(undefined)
+    expect(n1.previous).toBe(undefined)
+    /* n2 */
+    expect(n2.parent).toBe(n1)
+    expect(n2.next).toBe(undefined)
+    expect(n2.previous).toBe(undefined)
+    /* n3 */
+    expect(n3.parent).toBe(n2)
+    expect(n3.next).toBe(n4)
+    expect(n3.previous).toBe(undefined)
+    /* n4 */
+    expect(n4.parent).toBe(n2)
+    expect(n4.next).toBe(undefined)
+    expect(n4.previous).toBe(n3)
     expect([...n1.children]).toMatchObject([
       n2
     ])

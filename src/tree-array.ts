@@ -70,16 +70,16 @@ const children = <T extends TNode>(self: T): T[] => {
   }
 }
 
-const firstChild = <T extends TNode>(self: T): T | undefined => {
+const first = <T extends TNode>(self: T): T | undefined => {
   return children(self)[0] as T
 }
 
-const lastChild = <T extends TNode>(self: T): T | undefined => {
+const last = <T extends TNode>(self: T): T | undefined => {
   const nodes = children(self)
   return nodes[nodes.length - 1] as T
 }
 
-const nextSibling = <T extends TNode>(self: T): T | undefined => {
+const next = <T extends TNode>(self: T): T | undefined => {
   const ptr = self[PARENT]
   if (!ptr) {
     return
@@ -89,7 +89,7 @@ const nextSibling = <T extends TNode>(self: T): T | undefined => {
   return children(p)[id + 1]
 }
 
-const previousSibling = <T extends TNode>(self: T): T | undefined => {
+const previous = <T extends TNode>(self: T): T | undefined => {
   const ptr = self[PARENT]
   if (!ptr) {
     return
@@ -199,10 +199,10 @@ const prepend = <T extends TNode>(self: T, ...newNodes: T[]): void => {
 const fns: TreeFunctions = Object.freeze({
   parent,
   children,
-  firstChild,
-  lastChild,
-  nextSibling,
-  previousSibling,
+  first,
+  last,
+  next,
+  previous,
   remove,
   before,
   after,
@@ -233,20 +233,20 @@ export class Node implements ChildNode, ParentNode {
     return children(this)
   }
 
-  public get firstChild (): Node | undefined {
-    return firstChild(this)
+  public get first (): Node | undefined {
+    return first(this)
   }
 
-  public get lastChild (): Node | undefined {
-    return lastChild(this)
+  public get last (): Node | undefined {
+    return last(this)
   }
 
-  public get nextSibling (): Node | undefined {
-    return nextSibling(this)
+  public get next (): Node | undefined {
+    return next(this)
   }
 
-  public get previousSibling (): Node | undefined {
-    return previousSibling(this)
+  public get previous (): Node | undefined {
+    return previous(this)
   }
 
   public remove (): void {
