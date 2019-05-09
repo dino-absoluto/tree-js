@@ -35,13 +35,6 @@ interface TreeNode {
   [CHILDREN]?: TreeNode[]
 }
 
-const setPointer = <T extends TreeNode>(self: T, ptr?: ParentPointer): void => {
-  if (ptr && self[PARENT_CONSTRAINT]) {
-    (self[PARENT_CONSTRAINT] as (newParent: TreeNode) => void)(ptr.parent)
-  }
-  self[PARENT] = ptr
-}
-
 const parent = <T extends TreeNode>(self: T): T | undefined => {
   const ptr = self[PARENT]
   if (ptr) {
@@ -77,29 +70,34 @@ const lastChild = <T extends TreeNode>(self: T): T | undefined => {
 }
 
 const updateIndex = (
-  node: TreeNode,
+  self: TreeNode,
   start: number = 0,
   end: number | undefined = undefined
 ): void => {
-  const nodes = children(node)
+  const nodes = children(self)
   if (end == null) {
     end = nodes.length
   }
   for (let i = start; i < end; ++i) {
-    setPointer(nodes[i], {
-      parent: node,
+    const node = nodes[i]
+    if (node[PARENT_CONSTRAINT]) {
+      (node[PARENT_CONSTRAINT] as (newParent: TreeNode) => void)(self)
+    }
+    node[PARENT] = {
+      parent: self,
       index: i
-    })
+    }
   }
 }
 
 const remove = <T extends TreeNode>(self: T): void => {
-  const p = parent(self)
-  if (!p) {
+  const ptr = self[PARENT]
+  if (!ptr) {
     return
   }
-  const id = index(self) as number
-  setPointer(self)
+  const p = ptr.parent
+  const id = ptr.index
+  self[PARENT] = undefined
   children(p).splice(id, 1)
   updateIndex(p, id)
 }
@@ -111,36 +109,39 @@ const takeOver = <T extends TreeNode>(nodes: T[]): void => {
 }
 
 const before = <T extends TreeNode>(self: T, ...newNodes: T[]): void => {
-  const p = parent(self)
-  if (!p) {
+  const ptr = self[PARENT]
+  if (!ptr) {
     return
   }
-  const id = index(self) as number
+  const p = ptr.parent
+  const id = ptr.index
   takeOver(newNodes)
   children(p).splice(id, 0, ...newNodes)
   updateIndex(p, id)
 }
 
 const after = <T extends TreeNode>(self: T, ...newNodes: T[]): void => {
-  const p = parent(self)
-  if (!p) {
+  const ptr = self[PARENT]
+  if (!ptr) {
     return
   }
-  const id = index(self) as number
+  const p = ptr.parent
+  const id = ptr.index
   takeOver(newNodes)
   children(p).splice(id + 1, 0, ...newNodes)
   updateIndex(p, id + 1)
 }
 
 const replaceWith = <T extends TreeNode>(self: T, ...newNodes: T[]): void => {
-  const p = parent(self)
-  if (!p) {
+  const ptr = self[PARENT]
+  if (!ptr) {
     return
   }
-  const id = index(self) as number
+  const p = ptr.parent
+  const id = ptr.index
   takeOver(newNodes)
   children(p).splice(id, 1, ...newNodes)
-  setPointer(self)
+  self[PARENT] = undefined
   if (newNodes.length === 1) {
     updateIndex(p, id, id + 1)
   } else {
@@ -163,7 +164,6 @@ const prepend = <T extends TreeNode>(self: T, ...newNodes: T[]): void => {
 }
 
 export default Object.freeze({
-  setPointer,
   parent,
   index,
   children,
