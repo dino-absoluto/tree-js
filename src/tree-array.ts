@@ -22,13 +22,14 @@ import {
   ParentNode,
   PARENT_CONSTRAINT,
   PARENT,
-  CHILDREN
+  CHILDREN,
+  TreeFunctions
 } from './common'
 
 /* code */
 
 /**
- * @public
+ * @internal
  */
 export interface ParentPointer {
   parent: TNode
@@ -36,7 +37,7 @@ export interface ParentPointer {
 }
 
 /**
- * @public
+ * @internal
  */
 export interface TNode {
   [PARENT_CONSTRAINT]?: (newParent: TNode) => void
@@ -175,7 +176,7 @@ const prepend = <T extends TNode>(self: T, ...newNodes: T[]): void => {
 /**
  * @public
  */
-const fns = Object.freeze({
+const fns: TreeFunctions = Object.freeze({
   parent,
   children,
   firstChild,
@@ -192,8 +193,10 @@ export default fns
 /**
  * @public
  */
-export class Node implements TNode, ChildNode, ParentNode {
+export class Node implements ChildNode, ParentNode {
+  /** @internal */
   public [PARENT]?: ParentPointer
+  /** @internal */
   public [CHILDREN]?: TNode[]
 
   public get parent (): Node | undefined {

@@ -20,15 +20,15 @@
 import
 Link, {
   Node as LinkNode,
-  TNode as LinkTNode,
-  NodeList as LinkNodeList
+  TNode as _LinkTNode,
+  NodeList as _LinkNodeList
 } from './tree-link'
 
 import
 Linear, {
   Node as LinearNode,
-  TNode as LinearTNode,
-  ParentPointer as LinearParentPointer
+  TNode as _LinearTNode,
+  ParentPointer as _LinearParentPointer
 } from './tree-array'
 
 /* reexports */
@@ -36,14 +36,14 @@ export * from './common'
 export {
   Link,
   LinkNode,
-  LinkTNode,
-  LinkNodeList
+  _LinkTNode,
+  _LinkNodeList
 }
 export {
   Linear,
   LinearNode,
-  LinearTNode,
-  LinearParentPointer
+  _LinearTNode,
+  _LinearParentPointer
 }
 
 /* code */

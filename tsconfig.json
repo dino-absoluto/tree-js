@@ -19,8 +19,12 @@
     "declarationDir": "./__tmp__/built/dts",
     "tsBuildInfoFile": "./__tmp__/built/cache/tsbuildinfo"
   },
+  "include": [
+    "src/**/*.ts"
+  ],
   "exclude": [
     "__tmp__",
+    "dist",
     "**/*.spec.ts"
   ]
 }

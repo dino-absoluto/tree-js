@@ -20,6 +20,7 @@
 import {
   ChildNode,
   ParentNode,
+  Children,
   PARENT_CONSTRAINT,
   PARENT,
   NEXT,
@@ -27,12 +28,13 @@ import {
   FIRST,
   LAST,
   CHILDREN,
-  COUNT
+  COUNT,
+  TreeFunctions
 } from './common'
 /* code */
 
 /**
- * @public
+ * @internal
  */
 export interface TNode {
   /* child data */
@@ -48,7 +50,7 @@ export interface TNode {
 }
 
 /**
- * @public
+ * @internal
  */
 export class NodeList<T extends TNode> {
   private parent: T
@@ -255,7 +257,7 @@ const prepend = <T extends TNode> (self: T, ...newNodes: T[]): void => {
 /**
  * @public
  */
-const fns = Object.freeze({
+const fns: TreeFunctions = Object.freeze({
   parent,
   children,
   firstChild,
@@ -272,22 +274,29 @@ export default fns
 /**
  * @public
  */
-export class Node implements TNode, ChildNode, ParentNode {
+export class Node implements ChildNode, ParentNode {
   /* child data */
+  /** @internal */
   public [NEXT]?: TNode
+  /** @internal */
   public [PREVIOUS]?: TNode
+  /** @internal */
   public [PARENT]?: TNode
   /* parent data */
+  /** @internal */
   public [FIRST]?: TNode
+  /** @internal */
   public [LAST]?: TNode
+  /** @internal */
   public [CHILDREN]?: NodeList<TNode>
+  /** @internal */
   public [COUNT]?: number
 
   public get parent (): Node | undefined {
     return parent(this)
   }
 
-  public get children (): NodeList<Node> {
+  public get children (): Children<Node> {
     return children(this)
   }
 

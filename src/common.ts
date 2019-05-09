@@ -19,7 +19,9 @@
 /* imports */
 /* code */
 
-/** @public */
+/**
+ * @public
+ */
 export interface ChildNode {
   parent?: ParentNode
   remove (): void
@@ -28,12 +30,19 @@ export interface ChildNode {
   replaceWith (...items: ChildNode[]): void
 }
 
-/** @public */
+/**
+ * @public
+ */
+export interface Children<T extends object> {
+  length: number
+  [Symbol.iterator] (): IterableIterator<T>
+}
+
+/**
+ * @public
+ */
 export interface ParentNode {
-  children: {
-    length: number
-    [Symbol.iterator] (): IterableIterator<ChildNode>
-  }
+  children: Children<ChildNode>
   firstChild?: ChildNode
   lastChild?: ChildNode
   append (...items: ChildNode[]): void
@@ -72,3 +81,19 @@ export const CHILDREN = Symbol('count')
  * @public
  */
 export const COUNT = Symbol('count')
+
+/**
+ * @public
+ */
+export interface TreeFunctions {
+  parent <T extends object> (self: T): T | undefined
+  children <T extends object> (self: T): Children<T>
+  firstChild <T extends object> (self: T): T | undefined
+  lastChild <T extends object> (self: T): T | undefined
+  remove <T extends object> (self: T): void
+  before <T extends object> (self: T, ...newNodes: T[]): void
+  after <T extends object> (self: T, ...newNodes: T[]): void
+  replaceWith <T extends object> (self: T, ...newNodes: T[]): void
+  append <T extends object> (self: T, ...newNodes: T[]): void
+  prepend <T extends object> (self: T, ...newNodes: T[]): void
+}
