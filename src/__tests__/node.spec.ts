@@ -119,6 +119,11 @@ describe.each([
     expect([...p.children]).toMatchObject([
       n2, n1, n4, n3
     ])
+    n2.before()
+    n2.after()
+    expect([...p.children]).toMatchObject([
+      n2, n1, n4, n3
+    ])
     expect(p.firstChild).toBe(n2)
     expect(p.lastChild).toBe(n3)
   })

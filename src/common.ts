@@ -36,6 +36,8 @@ export interface ChildNode {
 export interface Children<T extends object> {
   length: number
   [Symbol.iterator] (): IterableIterator<T>
+  values (): IterableIterator<T>
+  entries (): IterableIterator<[number, T]>
 }
 
 /**
