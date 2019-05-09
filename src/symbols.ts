@@ -46,7 +46,7 @@ export const LAST = Symbol('last')
 /**
  * @internal
  */
-export const CHILDREN = Symbol('count')
+export const CHILDREN = Symbol('children')
 /**
  * @internal
  */
