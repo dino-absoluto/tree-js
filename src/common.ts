@@ -32,6 +32,7 @@ export interface ChildNode {
 export interface ParentNode {
   children: {
     length: number
+    [Symbol.iterator] (): IterableIterator<ChildNode>
   }
   firstChild?: ChildNode
   lastChild?: ChildNode
