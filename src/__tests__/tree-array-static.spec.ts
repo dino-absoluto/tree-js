@@ -17,14 +17,23 @@
  *
  */
 /* imports */
-import * as TreeLink from './tree-link'
-import * as TreeArray from './tree-array'
-import * as TreeArrayStatic from './tree-array-static'
+import { Node, PARENT_CONSTRAINT } from '../tree-array-static'
 
-/* reexports */
-export { ChildNode, ParentNode } from './common'
-export { TreeLink }
-export { TreeArray }
-export { TreeArrayStatic }
+class TNode extends Node {
+  public [PARENT_CONSTRAINT] (newParent: Node): void {
+    if (newParent instanceof TNode) {
+      return
+    }
+    throw new Error('TNode can only be added to TNode.')
+  }
+}
 
-/* code */
+describe('TreeArrayStatic', () => {
+  test('parent', () => {
+    const n1 = new TNode()
+    const n2 = new TNode()
+    n1.append(n2)
+    const n3 = new Node()
+    expect(() => n3.append(n1)).toThrow('TNode')
+  })
+})

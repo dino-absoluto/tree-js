@@ -19,7 +19,11 @@
 /* imports */
 import * as Benchmark from 'benchmark'
 import * as c from 'kleur'
-import { TreeLink, TreeArray } from '../src'
+import {
+  TreeLink,
+  TreeArray,
+  TreeArrayStatic
+} from '../src'
 import round = require('lodash/round')
 
 class TreeArrayNode extends TreeArray.Node {
@@ -28,8 +32,13 @@ class TreeArrayNode extends TreeArray.Node {
     super()
     this.id = id
   }
-  public [Symbol.iterator] (): IterableIterator<this> {
-    return this.children[Symbol.iterator]() as IterableIterator<this>
+}
+
+class TreeArrayStaticNode extends TreeArrayStatic.Node {
+  public id: number
+  public constructor (id: number) {
+    super()
+    this.id = id
   }
 }
 
@@ -38,9 +47,6 @@ class TreeLinkNode extends TreeLink.Node {
   public constructor (id: number) {
     super()
     this.id = id
-  }
-  public [Symbol.iterator] (): IterableIterator<this> {
-    return this.children[Symbol.iterator]() as IterableIterator<this>
   }
 }
 
@@ -59,7 +65,7 @@ const formatBench = (target: BenchResult): string => {
 }
 
 // eslint-disable-next-line
-//*
+/*
 Object.assign(Benchmark.options, {
   maxTime: 1,
   minSamples: 1
@@ -133,6 +139,9 @@ test('append / prepend', () => {
     ['Array', makeTest(
       (id: number) => new CustomArray<unknown>(id)
     )],
+    ['TreeArrayStatic', makeTest(
+      (id: number) => new TreeArrayStaticNode(id)
+    )],
     ['TreeArray', makeTest(
       (id: number) => new TreeArrayNode(id)
     )],
@@ -177,6 +186,9 @@ test('loop', () => {
   const tests: [string, () => void][] = [
     ['Array', makeTest(
       (id: number) => new CustomArray<unknown>(id)
+    )],
+    ['TreeArrayStatic', makeTest(
+      (id: number) => new TreeArrayStaticNode(id)
     )],
     ['TreeArray', makeTest(
       (id: number) => new TreeArrayNode(id)
@@ -241,6 +253,10 @@ test('synthetic', () => {
     }
   }
   const tests: [string, () => void][] = [
+    ['TreeArrayStatic', makeTest(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (id: number) => new TreeArrayStaticNode(id) as any
+    )],
     ['TreeArray', makeTest(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (id: number) => new TreeArrayNode(id) as any
