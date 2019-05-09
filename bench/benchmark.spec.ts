@@ -66,7 +66,8 @@ const formatBench = (target: BenchResult): string => {
 //*
 Object.assign(Benchmark.options, {
   maxTime: 1,
-  minSamples: 1
+  minSamples: 1,
+  delay: 0.1
 })
 // eslint-disable-next-line
 /*/
